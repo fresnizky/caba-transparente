@@ -26,7 +26,7 @@ fuentes:
     url: https://data.buenosaires.gob.ar/dataset/autoridades-superiores-funcionarios
     formato: CSV
     frecuencia: mensual según el catálogo (último archivo visto, 2024)
-    datos_personales: CUIL, edad y mail (se quitan antes de archivar)
+    datos_personales: CUIL, edad y mail (ver D-04)
     estado: relevado
 
   - id: sueldo-funcionarios

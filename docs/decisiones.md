@@ -32,11 +32,27 @@ Monorepo con Bun workspaces y TypeScript estricto, igual que Mendoza, para poder
 
 Dónde viven los originales: ver D-05.
 
-## D-04. Datos personales
+## D-04. Datos personales (abierta)
 
-**Fecha:** 18/10/2026
+**Fecha:** 18/10/2026 · **Estado:** abierta. Se decide con ejemplos concretos de cada fuente, después de las primeras descargas.
 
-Se publican nombre, cargo y organismo de funcionarios. Se quitan antes de archivar DNI, CUIL, edad, domicilio, mail y datos de familiares. Las fuentes cuyos originales traen esos datos no se mandan a la Wayback Machine (`WAYBACK_EXCLUDED`), porque la Wayback guarda el original y no nuestra copia limpia. A los proveedores que son personas humanas no se los perfila.
+**Qué hay que decidir:** qué hacer con DNI, CUIL, edad, domicilio, mail y datos de familiares cuando el original del Estado los trae. Esto incluye si nuestra copia y el espejo de archive.org guardan el original completo o una versión sin esos datos, si se pide captura a la Wayback Machine y cómo se trata a los proveedores que son personas humanas.
+
+**La tensión:** el enlace oficial (D-08) muestra el original completo, así que quitar los datos de nuestra copia no los oculta. Pero nuestras copias duran más que la del Estado, acumulan todas las versiones a lo largo de los años y en archive.org son casi imposibles de borrar. Además, una copia redactada deja de ser fiel al original, que es lo que da valor al archivo.
+
+**Casos conocidos hasta ahora** (`docs/relevamiento-fuentes.md`):
+
+- `autoridades-superiores`: dataset con CUIL, edad y mail de cada funcionario.
+- `boletin-oficial`: PDFs de publicación obligatoria. Falta verificar cuántos actos traen DNI o CUIL.
+- `compras-bac`: CUIT de proveedores que son personas humanas (20, 23, 24, 27).
+
+**Opciones a evaluar:** distinguir publicaciones oficiales obligatorias (copia fiel) de datasets con columnas que exceden la finalidad (versión redactada). En ambos casos se guarda en el manifest el sha256 del original.
+
+**Mientras esté abierta:**
+
+- Los originales de fuentes con datos personales se descargan solo a `data/raw/` local; no se suben a R2 ni a archive.org.
+- Los datos procesados y la web no muestran DNI, CUIL, edad, domicilio, mail ni datos de familiares.
+- A los proveedores que son personas humanas no se los perfila.
 
 ## D-05. Originales en Cloudflare R2, con segunda copia en archive.org
 
@@ -80,7 +96,7 @@ Cada número de la web enlaza a tres copias de su documento:
 | **Nuestra copia** | R2, público en `archivo.caba-transparente.com.ar` | `path` en `manifest.jsonl` |
 | **Espejo** | archive.org: el ítem con nuestra copia y, si existe, la captura de la Wayback Machine | `archive_url` en `archive-org.jsonl` |
 
-Si la fuente trae datos personales, «nuestra copia» es la versión sin esos datos y no hay captura de la Wayback (D-04). Si el Gobierno borra el documento, el enlace oficial se muestra como no disponible y quedan los otros dos.
+Qué muestran «nuestra copia» y el espejo cuando la fuente trae datos personales depende de D-04, que está abierta. Si el Gobierno borra el documento, el enlace oficial se muestra como no disponible y quedan los otros dos.
 
 ## D-09. Cuentas y dominios
 
@@ -119,5 +135,6 @@ Se trabaja como un equipo desde el primer día, aunque hoy haya una sola persona
 
 ## Abiertas
 
+- **Datos personales.** Ver D-04.
 - **Stack de la web.** Se decide después de ver los primeros datos.
 - **Acceso desde la nube.** Probado el 18/10/2026: todos los sitios relevados responden desde GitHub Actions salvo Estadística de la Ciudad, que también falla desde Argentina (sitio inestable). Por ahora no hace falta proxy. Detalle en `docs/relevamiento-fuentes.md`.

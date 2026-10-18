@@ -57,7 +57,7 @@ Lo verificado:
 
 | Dataset | Qué trae | Último período visto | Alerta |
 |---|---|---|---|
-| `autoridades-superiores-funcionarios` | Estructura completa: ministerio, repartición, sigla, puesto, nombre, desde/hasta, `reporta_a` (jerarquía) | 2024 (archivo del 05/02/2025) | Trae **CUIL, edad y mail**: se quitan antes de archivar |
+| `autoridades-superiores-funcionarios` | Estructura completa: ministerio, repartición, sigla, puesto, nombre, desde/hasta, `reporta_a` (jerarquía) | 2024 (archivo del 05/02/2025) | Trae **CUIL, edad y mail** (ver D-04) |
 | `sueldo-funcionarios` | Sueldos de jefe y vicejefe de Gobierno, jefe de Gabinete, ministros y secretarios | 2024 | |
 | `declaraciones-juradas` | Formato largo (`informacion, tipo_de_dato, valor, presentacion, periodo`) | 2022 | En las primeras filas no se ve de quién es cada declaración: falta revisar el archivo completo |
 
