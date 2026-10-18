@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.env.local
+/tmp/
+
+# archive.org S3 keys (docs/procesos/datos-y-archivo.md)
+.env.archive-org
+
+# Raw files do not go to git (docs/decisiones.md, D-03): only their manifests do.
+# The originals live in data/raw locally and their copies on archive.org.
+data/raw/**
+!data/raw/**/
+!data/raw/.gitkeep
+!data/raw/**/manifest.jsonl
+!data/raw/**/archive-org.jsonl

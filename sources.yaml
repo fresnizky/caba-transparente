@@ -1,0 +1,62 @@
+# Catálogo de fuentes. Una entrada por fuente; `id` es la carpeta en data/raw/<id>/ y data/processed/<id>/
+# y el archivo packages/scrapers/src/sources/<id>.ts.
+# estado: relevado (visto, sin recolector) | activo | roto | pausado
+# Detalle de cada una en docs/relevamiento-fuentes.md.
+
+fuentes:
+  - id: compras-bac
+    nombre: Buenos Aires Compras (OCDS)
+    organismo: Ministerio de Hacienda y Finanzas
+    url: https://data.buenosaires.gob.ar/dataset/buenos-aires-compras
+    formato: CSV (OCDS aplanado), JSON
+    frecuencia: trimestral
+    estado: relevado
+
+  - id: boletin-oficial
+    nombre: Boletín Oficial de la Ciudad
+    organismo: Secretaría Legal y Técnica
+    url: https://api-restboletinoficial.buenosaires.gob.ar/api/doc/
+    formato: API REST (JSON) y PDF
+    frecuencia: diaria (días hábiles)
+    estado: relevado
+
+  - id: autoridades-superiores
+    nombre: Autoridades superiores y funcionarios
+    organismo: Ministerio de Hacienda y Finanzas
+    url: https://data.buenosaires.gob.ar/dataset/autoridades-superiores-funcionarios
+    formato: CSV
+    frecuencia: mensual según el catálogo (último archivo visto, 2024)
+    datos_personales: CUIL, edad y mail (se quitan antes de archivar)
+    estado: relevado
+
+  - id: sueldo-funcionarios
+    nombre: Sueldos de autoridades superiores
+    organismo: Ministerio de Hacienda y Finanzas
+    url: https://data.buenosaires.gob.ar/dataset/sueldo-funcionarios
+    formato: CSV
+    frecuencia: trimestral según el catálogo (último archivo visto, 2024)
+    estado: relevado
+
+  - id: declaraciones-juradas
+    nombre: Declaraciones juradas de funcionarios
+    organismo: Secretaría Legal y Técnica
+    url: https://data.buenosaires.gob.ar/dataset/declaraciones-juradas
+    formato: CSV
+    frecuencia: mensual según el catálogo (último período visto, 2022)
+    estado: relevado
+
+  - id: presupuesto-ejecutado
+    nombre: Presupuesto ejecutado
+    organismo: Ministerio de Hacienda y Finanzas
+    url: https://data.buenosaires.gob.ar/dataset/presupuesto-ejecutado-2026
+    formato: CSV
+    frecuencia: trimestral
+    estado: relevado
+
+  - id: ba-obras
+    nombre: Obras públicas (BA Obras)
+    organismo: Secretaría Legal y Técnica
+    url: https://data.buenosaires.gob.ar/dataset/ba-obras
+    formato: CSV
+    frecuencia: semestral
+    estado: relevado
