@@ -67,6 +67,6 @@ Lo verificado:
 
 ## Sin verificar
 
-- Si algún sitio de la Ciudad bloquea las IPs de GitHub Actions. Todas las pruebas se hicieron desde una conexión en Argentina.
-- Legislatura porteña (`legislatura.gob.ar`, `parlamentaria.legislatura.gov.ar`): responden, no se relevaron.
-- Dirección de Estadística (`estadisticaciudad.gob.ar`): no respondió.
+- Si algún sitio de la Ciudad bloquea las IPs de GitHub Actions. Todas las pruebas se hicieron desde una conexión en Argentina. Para comprobarlo: `bun run probar-acceso` (local) y el workflow «Acceso a los sitios de la Ciudad» (GitHub Actions).
+- Legislatura porteña (`legislatura.gob.ar`, `parlamentaria.legislatura.gob.ar`): responden, no se relevaron.
+- Dirección de Estadística (`estadisticaciudad.gob.ar`): no respondió en la primera prueba; respondió en la segunda. No se relevó.
