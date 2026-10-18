@@ -65,8 +65,25 @@ Lo verificado:
 
 `presupuesto-sancionado`, `presupuesto-ejecutado` y `presupuesto-ejecutado-2026` (trimestral), `ba-obras` (con CUIT de la constructora y monto), `seguimiento-obras-adjudicadas-soa`, `pauta-publicitaria`, `concesiones`, `recaudacion-impositiva`, `servicio-informacion-normativa` (normativa desde 1882).
 
+## Acceso desde la nube
+
+Probado el 18/10/2026 con `bun run probar-acceso`, desde una conexión en Argentina y dos veces desde GitHub Actions (IPs de Microsoft en EE. UU.):
+
+| Sitio | Argentina | GitHub Actions |
+|---|---|---|
+| Datos abiertos: API CKAN, sitio y CDN | ✅ | ✅ |
+| Boletín Oficial: API, documentos y sitio | ✅ | ✅ |
+| Buenos Aires Compras, buenosaires.gob.ar | ✅ | ✅ |
+| Legislatura (sitio y parlamentaria) | ✅ | ✅ |
+| Registro Nacional de Sociedades, archive.org | ✅ | ✅ |
+| Estadística de la Ciudad | Intermitente: respondió una vez y falló dos | Sin respuesta en 30 s, las dos veces |
+
+**Conclusión:** a diferencia de Mendoza, ningún sitio de la Ciudad bloquea a GitHub Actions; no hace falta proxy. Estadística falla también desde Argentina, así que es inestabilidad del sitio y no un bloqueo. Hay que volver a probarla antes de escribir su recolector.
+
+`parlamentaria.legislatura.gov.ar` redirige a `parlamentaria.legislatura.gob.ar`.
+
 ## Sin verificar
 
-- Si algún sitio de la Ciudad bloquea las IPs de GitHub Actions. Todas las pruebas se hicieron desde una conexión en Argentina. Para comprobarlo: `bun run probar-acceso` (local) y el workflow «Acceso a los sitios de la Ciudad» (GitHub Actions).
-- Legislatura porteña (`legislatura.gob.ar`, `parlamentaria.legislatura.gob.ar`): responden, no se relevaron.
-- Dirección de Estadística (`estadisticaciudad.gob.ar`): no respondió en la primera prueba; respondió en la segunda. No se relevó.
+- Legislatura porteña: responde, no se relevó qué publica.
+- Dirección de Estadística: qué publica y si se estabiliza.
+- Cómo se comporta el firewall de `data.buenosaires.gob.ar` con un recolector real (muchos pedidos espaciados en una corrida larga).
