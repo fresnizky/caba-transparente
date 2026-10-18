@@ -120,4 +120,4 @@ Se trabaja como un equipo desde el primer día, aunque hoy haya una sola persona
 ## Abiertas
 
 - **Stack de la web.** Se decide después de ver los primeros datos.
-- **Acceso desde la nube.** Si los sitios de la Ciudad responden desde GitHub Actions (workflow «Acceso a los sitios de la Ciudad»). Si alguno no responde, hace falta un proxy con IP argentina.
+- **Acceso desde la nube.** Probado el 18/10/2026: todos los sitios relevados responden desde GitHub Actions salvo Estadística de la Ciudad, que también falla desde Argentina (sitio inestable). Por ahora no hace falta proxy. Detalle en `docs/relevamiento-fuentes.md`.
