@@ -35,6 +35,10 @@ Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Bue
 - Antes de escribir una función auxiliar, buscar en `packages/core/src/util.ts`.
 - Al terminar una fuente, actualizar su `estado` en `sources.yaml`.
 
+## Ramas y PR
+
+Todo cambio va en una rama `<tipo>/<descripcion>` que sale de `main` y vuelve por PR, con mensajes en Conventional Commits (tipo en inglés, descripción en español). Los agentes abren el PR pero no lo mergean salvo pedido explícito para ese PR. Detalle en `docs/procesos/ramas-y-prs.md`.
+
 ## Verificación
 
 `bun run typecheck`, `bun test` y `bun run lint` antes de dar algo por terminado.

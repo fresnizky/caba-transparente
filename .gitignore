@@ -9,7 +9,7 @@ dist/
 .env.archive-org
 
 # Raw files do not go to git (docs/decisiones.md, D-03): only their manifests do.
-# The originals live in data/raw locally and their copies on archive.org.
+# The originals live in Cloudflare R2 and archive.org (D-05); data/raw is a local working cache.
 data/raw/**
 !data/raw/**/
 !data/raw/.gitkeep

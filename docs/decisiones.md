@@ -30,7 +30,7 @@ Monorepo con Bun workspaces y TypeScript estricto, igual que Mendoza, para poder
 
 **Por qué:** los CSV de Buenos Aires Compras pesan entre 255 MB y 2,6 GB, y GitHub rechaza archivos de más de 100 MB. Además, el repo de Mendoza ya pesa más de 500 MB con los originales adentro.
 
-**Provisoria:** falta elegir un almacenamiento principal para los originales (ver «Abiertas»). Mientras tanto, la máquina local más archive.org son las dos copias.
+Dónde viven los originales: ver D-05.
 
 ## D-04. Datos personales
 
@@ -38,8 +38,86 @@ Monorepo con Bun workspaces y TypeScript estricto, igual que Mendoza, para poder
 
 Se publican nombre, cargo y organismo de funcionarios. Se quitan antes de archivar DNI, CUIL, edad, domicilio, mail y datos de familiares. Las fuentes cuyos originales traen esos datos no se mandan a la Wayback Machine (`WAYBACK_EXCLUDED`), porque la Wayback guarda el original y no nuestra copia limpia. A los proveedores que son personas humanas no se los perfila.
 
+## D-05. Originales en Cloudflare R2, con segunda copia en archive.org
+
+**Fecha:** 18/10/2026
+
+- **R2 es la copia principal.** Cada original se sube con la misma ruta que figura en `manifest.jsonl` (`data/raw/<fuente>/<fecha>/<archivo>`), así el manifest no depende del proveedor y migrar es copiar los archivos (por ejemplo con `rclone`) y cambiar la configuración.
+- **archive.org es la segunda copia** (`bun run archivar`): un ítem por fuente y mes, y la captura de la URL oficial en la Wayback Machine.
+- La copia local en `data/raw/` es un caché de trabajo, no un respaldo.
+
+**Por qué:** volumen medido el 18/10/2026: unos 3,5 GB por año hacia adelante (Boletín ~2,5 GB, Buenos Aires Compras ~0,85 GB, el resto ~0,2 GB). R2 da 10 GB gratis y después cobra USD 0,015 por GB al mes, sin cargo por descargas, así que sacar los datos para migrar no cuesta nada. Backblaze B2 era más barato por GB pero limita las descargas gratis; GitHub LFS cobra cada descarga, incluidas las de Actions.
+
+## D-06. Web y panel en Cloudflare
+
+**Fecha:** 18/10/2026
+
+- **Web:** Cloudflare Pages, con páginas pre-generadas en el build y funciones solo donde haga falta. Lo estático no tiene límite de tráfico en el plan gratis.
+- **Panel interno:** proyecto aparte en Cloudflare Pages, detrás de Cloudflare Access.
+- **DNS** del dominio en Cloudflare, en la misma cuenta que R2.
+
+**Por qué:** es la misma arquitectura que usa Mendoza Transparente en el plan gratis. Cupos a vigilar: 500 builds por mes y 20.000 archivos por despliegue. Si el sitio se acerca a ese límite, primero se construye en GitHub Actions y se sube armado; si no alcanza, el plan pago (USD 5 por mes, 100.000 archivos).
+
+## D-07. Historia completa, de lo más nuevo a lo más viejo
+
+**Fecha:** 18/10/2026
+
+Se trae toda la historia publicada de cada fuente. Cada recolector empieza por lo más reciente y avanza hacia atrás, respetando los límites de cada sitio, y se puede cortar y retomar donde quedó.
+
+**Por qué:** lo primero que va a aparecer son cambios de formato (que piden ajustar los lectores), no un problema de espacio. Ir hacia atrás de a poco muestra cada cambio de formato cuando aparece, con los datos recientes ya funcionando. El volumen estimado del Boletín completo (150 a 230 GB) cuesta unos USD 2 a 3,50 por mes en R2.
+
+**Consecuencia para los lectores:** un documento que no se puede leer no frena la corrida. Se registra en un archivo de cobertura con el motivo (formato nuevo, imagen escaneada, error) y se sigue con el siguiente.
+
+## D-08. Tres enlaces por documento
+
+**Fecha:** 18/10/2026
+
+Cada número de la web enlaza a tres copias de su documento:
+
+| Enlace | Dónde está | De dónde sale |
+|---|---|---|
+| **Oficial** | El sitio del Gobierno de la Ciudad | `url` en `manifest.jsonl` |
+| **Nuestra copia** | R2, público en `archivo.caba-transparente.com.ar` | `path` en `manifest.jsonl` |
+| **Espejo** | archive.org: el ítem con nuestra copia y, si existe, la captura de la Wayback Machine | `archive_url` en `archive-org.jsonl` |
+
+Si la fuente trae datos personales, «nuestra copia» es la versión sin esos datos y no hay captura de la Wayback (D-04). Si el Gobierno borra el documento, el enlace oficial se muestra como no disponible y quedan los otros dos.
+
+## D-09. Cuentas y dominios
+
+**Fecha:** 18/10/2026
+
+- Las cuentas (GitHub, Cloudflare, archive.org, PostHog) quedan por ahora a nombre de quien mantiene el proyecto (cuenta de GitHub `fresnizky`). Se reorganizan si el proyecto suma gente o una organización.
+- Dominios registrados en NIC Argentina: `caba-transparente.com.ar` y `caba-transparente.ar`. El principal es `caba-transparente.com.ar`; el `.ar` redirige a él (301), igual que `www`.
+
+## D-10. Licencias
+
+**Fecha:** 18/10/2026
+
+- **Código:** MIT.
+- **Datos procesados** (`data/processed`, `data/curado`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es). Cualquiera puede usarlos, también con fines comerciales, citando la fuente.
+- **Documentos originales:** pertenecen a sus organismos; los archivamos y redistribuimos como copia fiel.
+
+## D-11. Analítica con PostHog
+
+**Fecha:** 18/10/2026
+
+PostHog, en su plan gratis (alrededor de un millón de eventos por mes, según fuentes no oficiales consultadas el 18/10/2026). Como usa cookies, el sitio necesita un aviso de consentimiento o configurarlo para que no guarde nada en el navegador hasta que la persona acepte. Se define al armar la web.
+
+## D-12. Panel interno
+
+**Fecha:** 18/10/2026
+
+Arranca con las mismas funciones que el de Mendoza Transparente: revisar los reportes de errores que manda la gente y registrar los pedidos de acceso a la información (en la Ciudad, Ley 104). El detalle se define al construirlo.
+
+## D-13. Flujo de trabajo en equipo
+
+**Fecha:** 18/10/2026
+
+Se trabaja como un equipo desde el primer día, aunque hoy haya una sola persona: todo cambio entra por PR a `main`, con la CI en verde. Detalle en `docs/procesos/ramas-y-prs.md`.
+
+**Por qué una sola rama principal:** Mendoza usa `dev` y `main` para controlar cuándo se publica. Acá alcanza con `main` y las vistas previas de Cloudflare en cada PR; si hace falta una rama de publicación, se agrega después.
+
 ## Abiertas
 
-- **Almacenamiento principal de los originales.** Opciones: Cloudflare R2 (sin costo de salida, ~USD 0,015 por GB al mes), Backblaze B2, o solo archive.org. A decidir antes de correr recolectores en GitHub Actions, donde la máquina se borra después de cada corrida.
-- **Remoto en GitHub, dominio y nombre público.** El dominio `caba-transparente.com.ar` estaba libre el 18/10/2026.
-- **Web.** Qué stack y cuándo.
+- **Stack de la web.** Se decide después de ver los primeros datos.
+- **Acceso desde la nube.** Si los sitios de la Ciudad responden desde GitHub Actions (workflow «Acceso a los sitios de la Ciudad»). Si alguno no responde, hace falta un proxy con IP argentina.
