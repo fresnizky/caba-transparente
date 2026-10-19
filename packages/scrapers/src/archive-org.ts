@@ -38,12 +38,11 @@ import {
 const REPO = "https://github.com/fresnizky/caba-transparente";
 
 /**
- * Sources whose official documents carry personal data we strip before archiving. Our cleaned copy
- * goes to the archive.org item; the original is never sent to the Wayback Machine.
+ * Sources whose official documents carry personal data. The Wayback Machine keeps the original as
+ * published, so these are never sent there. What we archive for them is pending (D-04).
  */
 const WAYBACK_EXCLUDED: Record<string, string> = {
-  // The official dataset lists every official with CUIL, age and email: we archive it without them.
-  "autoridades-superiores": "the official CSV has CUIL, age and email of every official; we archive it redacted",
+  "autoridades-superiores": "the official CSV has CUIL, age and email of every official (D-04)",
 };
 
 // Save Page Now allows 7 captures per minute for an authenticated account.

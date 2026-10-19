@@ -24,7 +24,10 @@ Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Bue
 
 ## Datos personales (regla sin excepciones)
 
-- Se publican nombre, cargo y organismo de funcionarios (actos públicos). Nunca DNI, CUIL, edad, domicilio, mail personal ni familiares: se quitan **antes** de archivar, y la fuente se agrega a `WAYBACK_EXCLUDED` (`packages/scrapers/src/archive-org.ts`) en el mismo commit.
+La decisión de fondo está abierta (D-04 en `docs/decisiones.md`). Mientras tanto:
+
+- Se publican nombre, cargo y organismo de funcionarios (actos públicos). Los datos procesados y la web nunca muestran DNI, CUIL, edad, domicilio, mail personal ni familiares.
+- Los originales de fuentes que traen esos datos quedan solo en `data/raw/` local: no se suben a R2 ni a archive.org. La fuente va en `WAYBACK_EXCLUDED` (`packages/scrapers/src/archive-org.ts`) en el mismo commit que agrega su recolector.
 - A los proveedores que son personas humanas (CUIT 20, 23, 24, 27) no se los perfila.
 - Solo se usa lo que el Estado publica. Nunca pasar un login o un captcha, ni guardar datos expuestos por error.
 
@@ -34,6 +37,10 @@ Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Bue
 - Un recolector por fuente: `packages/scrapers/src/sources/<id>.ts`, que exporta `async function run(args: string[])`. Se corre con `bun run scrape <id>`. El `id` es también la carpeta en `data/raw/<id>/` y `data/processed/<id>/`.
 - Antes de escribir una función auxiliar, buscar en `packages/core/src/util.ts`.
 - Al terminar una fuente, actualizar su `estado` en `sources.yaml`.
+
+## Ramas y PR
+
+Todo cambio va en una rama `<tipo>/<descripcion>` que sale de `main` y vuelve por PR, con mensajes en Conventional Commits (tipo en inglés, descripción en español). Los agentes abren el PR pero no lo mergean salvo pedido explícito para ese PR. Detalle en `docs/procesos/ramas-y-prs.md`.
 
 ## Verificación
 

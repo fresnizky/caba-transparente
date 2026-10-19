@@ -17,7 +17,7 @@ flowchart TD
 ```
 
 1. **Recolector.** Un script por fuente en `packages/scrapers/src/sources/<id>.ts`.
-2. **Archivo original.** Se guarda tal cual llegó en `data/raw/<fuente>/<fecha>/`, con su sha256 en `manifest.jsonl`. Los originales no van a git; los manifests sí ([decisión D-03](docs/decisiones.md)).
+2. **Archivo original.** Se guarda tal cual llegó en `data/raw/<fuente>/<fecha>/`, con su sha256 en `manifest.jsonl`. Los originales no van a git: viven en Cloudflare R2; los manifests sí van a git ([decisiones D-03 y D-05](docs/decisiones.md)).
 3. **Copia en archive.org.** El original se sube a un ítem de archive.org y la Wayback Machine captura la URL oficial.
 4. **Datos normalizados.** CSV en `data/processed/<fuente>/`, con su diccionario `<archivo>.meta.json`.
 
@@ -46,4 +46,4 @@ bun run lint
 
 ## Créditos y licencia
 
-Código: [MIT](LICENSE). La infraestructura de descarga, archivado y copia en archive.org está adaptada de [Mendoza Transparente](https://github.com/unllamas/mendoza-transparente) (MIT); los archivos adaptados lo indican en su cabecera. Los datos originales pertenecen a sus organismos de origen.
+Código: [MIT](LICENSE). Datos procesados: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es). La infraestructura de descarga, archivado y copia en archive.org está adaptada de [Mendoza Transparente](https://github.com/unllamas/mendoza-transparente) (MIT); los archivos adaptados lo indican en su cabecera. Los datos originales pertenecen a sus organismos de origen.
