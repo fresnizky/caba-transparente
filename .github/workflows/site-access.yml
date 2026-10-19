@@ -1,4 +1,4 @@
-# Comprueba si los sitios de la Ciudad responden desde GitHub Actions (decisión abierta en docs/decisiones.md).
+# Comprueba si los sitios de la Ciudad responden desde GitHub Actions (resultados en docs/relevamiento-fuentes.md).
 # Un pedido chico por sitio, en secuencia y con pausa. El resultado queda en el resumen del job y como artefacto.
 # Se corre a mano: Actions → «Acceso a los sitios de la Ciudad» → Run workflow.
 
