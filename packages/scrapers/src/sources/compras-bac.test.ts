@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import { type AwardSummary, addAwardRow, addTenderRow, type ProcessSummary, processRow, supplierFields } from "./compras-bac.ts";
+import {
+  type AwardSummary,
+  addAwardRow,
+  addTenderRow,
+  type ProcessSummary,
+  processRow,
+  supplierFields,
+  titleFields,
+} from "./compras-bac.ts";
 
 const tenderRow = (over: Partial<Parameters<typeof addTenderRow>[2]> = {}) => ({
   ocid: "ocds-bulbcf-101-0001-LPU26-1",
@@ -56,6 +64,43 @@ describe("supplierFields", () => {
       proveedor_nombre: null,
     });
     expect(supplierFields("Proveedor sin CUIT", "")).toEqual({ proveedor_tipo: "sin_cuit", proveedor_cuit: null, proveedor_nombre: null });
+  });
+});
+
+describe("titleFields", () => {
+  test("hides titles that name a patient", () => {
+    for (const title of [
+      "PROTESIS DE CADERA PTE: PRUEBA MARIA HCNº 100000",
+      "Prótesis traumatológica pte. Ejemplo Juan",
+      "Provisión de Insumos para el Paciente EJEMPLO, ANA DNI12345678",
+      "ADQUISICION CPAP AYUDA MEDICA PACIENTEPRUEBA JUAN",
+      "Provision Marcapasos (Pac Ejemplo Rosa)",
+      "ARPÓN DE DOBLE SUTURA. PCTE: PRUEBA, ARIEL",
+      "AYUDA MÉDICA - EJEMPLO PEDRO - SILLA DE RUEDAS",
+      "AYUDA MEDICA PAC. PRUEBA, LUIS H.C. N° 100.000 (PET)",
+      "Cardiología. Ay Méd EJEMPLO ANA. Adq marcapasos. Ped 78",
+      "Adq. Parche de Teflon, Ay Med PRUEBA JUAN CCV",
+      "A.M. ALQ. CONCENTRADOR OXIGENO EJEMPLO ROSA",
+      "A.Medica- Prueba Claudia.Div.Ortopedia y Traumatologia",
+      "OCLUSOR DE FORAMEN OVAL PERMEABLE (EJEMPLO C. 12345678)",
+    ]) {
+      expect(titleFields(title)).toEqual({ titulo: null, titulo_oculto: true });
+    }
+  });
+
+  test("keeps titles without markers, including look-alike words", () => {
+    for (const title of [
+      "ADQUISICION DE LUPA ASFERICAS, PLAN PACES",
+      "Adquisición de material bibliográfico // EX-2025-10000001-GCABA-DGPTE",
+      "Serv. Hemodiálisis para beneficiarios del Prog. Incluir Salud",
+      "ADQUISICIÓN DE LECTORES PROYECTO HISTORIA CLÍNICA ELECTRÓNICA",
+      "Servicio de packaging y capacitación",
+      "MAYOR MEDIDA DE CAÑERÍAS",
+      "Adquisición de material de pintureria y ferreteria - EX. 10000002",
+      "SERVICIO DE REPARACION INTEGRAL PLETISMOGRAFO N.º INV. 10000003",
+    ]) {
+      expect(titleFields(` ${title} `)).toEqual({ titulo: title, titulo_oculto: false });
+    }
   });
 });
 

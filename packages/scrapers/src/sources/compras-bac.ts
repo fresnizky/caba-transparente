@@ -149,6 +149,31 @@ export function supplierFields(name: string, id: string): Row {
   return { proveedor_tipo: kind, proveedor_cuit: cuit, proveedor_nombre: clean(name) };
 }
 
+/**
+ * Markers of a title that names a patient: hospitals title many purchases after the person they are for, sometimes with
+ * clinical record number or DNI ("PROTESIS DE CADERA PTE: <apellido> <nombre> HC Nº <número>"). Letters around the
+ * abbreviations are checked by hand because `\b` ignores accented letters; digits may follow ("DNI12345678").
+ * New markers go here; reprocessing from data/raw applies them to the whole history (D-04).
+ */
+const PERSONAL_DATA = new RegExp(
+  [
+    String.raw`(?<![A-ZÁÉÍÓÚÑ])(PTES?|PAC|CUIL|D\.?\s?N\.?\s?I)(?![A-ZÁÉÍÓÚÑ])`,
+    "(?<![A-ZÁÉÍÓÚÑ])(PACIENTE|PCTE)",
+    String.raw`(?<![A-ZÁÉÍÓÚÑ])H\.?\s?C\.?\s?N?[º°]?\s?\d`,
+    // "Ayuda médica" (purchase for one person) and its abbreviations: AY. MÉD., AY MED, A.M., A.MEDICA.
+    String.raw`(?<![A-ZÁÉÍÓÚÑ])(AY(UDAS?)?\.?\s*M[EÉ]D|A\.\s?M(\.|[EÉ]D))`,
+    // Surname, initial and DNI with no label: "(<APELLIDO> C. 12345678)".
+    String.raw`(?<![A-ZÁÉÍÓÚÑ])[A-ZÁÉÍÓÚÑ]\.\s?\d{1,2}\.?\d{3}\.?\d{3}(?!\d)`,
+  ].join("|"),
+  "i",
+);
+
+/** Title to publish: hidden when it has a marker of personal data, flagged so it is not read as missing. */
+export function titleFields(title: string): { titulo: string | null; titulo_oculto: boolean } {
+  const hidden = PERSONAL_DATA.test(title);
+  return { titulo: hidden ? null : clean(title), titulo_oculto: hidden };
+}
+
 interface Lot {
   processId: string;
   amount: number | null;
@@ -168,7 +193,7 @@ export function addTenderRow(processes: Map<string, ProcessSummary>, lots: Map<s
       row: {
         proceso_id: t.id,
         fecha: day(t.date),
-        titulo: clean(t.title),
+        ...titleFields(t.title),
         estado: clean(t.status),
         procedimiento: clean(t.methodDetails),
         metodo: clean(t.method),
@@ -200,7 +225,9 @@ export function processRow(p: ProcessSummary): Row {
 const PROCESS_COLUMNS = {
   proceso_id: "Número de proceso en BAC (`tender/id`): unidad ejecutora, número, año y tipo de procedimiento.",
   fecha: "Fecha de publicación del proceso (AAAA-MM-DD).",
-  titulo: "Título del proceso.",
+  titulo: "Título del proceso. Vacío si se ocultó (ver `titulo_oculto`).",
+  titulo_oculto:
+    "true si el título se ocultó porque tiene marcas de datos de un paciente (PTE, PACIENTE, HC, DNI, AYUDA MÉDICA…); el título está en el original.",
   estado: "Estado OCDS del proceso: complete, active, cancelled, unsuccessful.",
   procedimiento: "Tipo de procedimiento según BAC (licitación pública, contratación directa, contratación menor…).",
   metodo: "Método OCDS: open, selective, limited, direct.",
@@ -219,7 +246,9 @@ const AWARD_OUTPUT_COLUMNS = {
   ocid: "Identificador OCDS del lote adjudicado.",
   proceso_id: "Número de proceso en BAC; une con `procesos`.",
   fecha: "Fecha de la adjudicación (AAAA-MM-DD).",
-  titulo: "Título de la adjudicación.",
+  titulo: "Título de la adjudicación. Vacío si se ocultó (ver `titulo_oculto`).",
+  titulo_oculto:
+    "true si el título se ocultó porque tiene marcas de datos de un paciente (PTE, PACIENTE, HC, DNI, AYUDA MÉDICA…); el título está en el original.",
   rubro: "Rubro según BAC.",
   estado: "Estado OCDS de la adjudicación.",
   monto: "Monto adjudicado, en la moneda indicada y en valores nominales.",
@@ -260,7 +289,7 @@ export function addAwardRow(awards: Map<string, AwardSummary>, a: Picked<typeof 
     row: {
       ocid: a.ocid,
       fecha: day(a.date),
-      titulo: clean(a.title),
+      ...titleFields(a.title),
       rubro: clean(a.description),
       estado: clean(a.status),
       monto: amount(a.amount),
@@ -349,6 +378,7 @@ async function processAll(): Promise<void> {
   const notes = [
     "BAC publica una fila por ítem; acá hay una fila por proceso o por lote adjudicado.",
     "Montos nominales en la moneda de cada fila: no se convierten ni se ajustan por inflación.",
+    "Los títulos que nombran a un paciente (compras de hospitales para una persona) se ocultan; la detección es por marcas y puede dejar pasar alguno (D-04 en docs/decisiones.md).",
   ];
   const processCounts = await writeByYear("procesos", processRows, PROCESS_COLUMNS, {
     titulo: "Buenos Aires Compras: procesos de compra",

@@ -42,7 +42,7 @@ Estructura:
 Datos personales (D-04):
 
 - **Proveedores personas humanas:** 933 de 4.524 proveedores distintos (32.384 adjudicaciones) tienen CUIT 20, 23, 24 o 27. `award.csv`, `parties.csv` y `contracts.csv` traen su nombre y CUIT. En `contracts.csv`, `signatories` es el proveedor, no un funcionario.
-- **Pacientes en los títulos:** muchas compras de hospitales llevan en el título el nombre del paciente para el que se compra (prótesis, medicamentos), a veces con número de historia clínica o DNI. Unos 7.300 procesos (9 %) tienen marcadores como «PTE», «PACIENTE», «HC» o «DNI»; puede haber más sin marcador. Es un dato de salud asociado a una persona.
+- **Pacientes en los títulos:** muchas compras de hospitales llevan en el título el nombre del paciente para el que se compra (prótesis, medicamentos), a veces con número de historia clínica o DNI. Es un dato de salud asociado a una persona. Las formas más comunes son «PTE.», «PCTE:», «PACIENTE», «PAC.», «HC Nº», «DNI», «AYUDA MÉDICA» o «AY. MÉD.», «A.M.», y apellido con inicial seguido del DNI sin rótulo. Con esas marcas se ocultan 10.974 de 82.115 procesos (13,4 %); en una revisión a mano de títulos de hospitales con forma «APELLIDO, NOMBRE» apareció alguno sin ninguna marca (D-04).
 - `parties.csv` no trae domicilio ni contacto de los proveedores: los domicilios y mails son de las unidades compradoras.
 
 Disponibilidad: el 19/10/2026, después de bajar unos 2 GB en secuencia, el CDN y el portal respondieron 503 y 502 durante unos 12 minutos. Cuando volvieron, `bac.csv` siguió respondiendo 503 (a `HEAD` y a pedidos parciales) mientras el resto respondía bien.
