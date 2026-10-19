@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { parseCsv, toCsv } from "./csv.ts";
+import { parseCsv, parseCsvStream, toCsv } from "./csv.ts";
 import { normalizeCuit, personKind } from "./util.ts";
 
 describe("csv", () => {
@@ -9,6 +9,21 @@ describe("csv", () => {
     const [header, row] = parseCsv(toCsv(rows));
     expect(header).toEqual(["nombre", "nota", "monto"]);
     expect(row).toEqual(['Escuela "Jorge Donn", DE 10', "línea 1\nlínea 2", "1234.5"]);
+  });
+
+  test("the streaming parser matches parseCsv wherever the chunks are split", async () => {
+    const text = 'id,nombre,nota\r\n1,"Café ""El Ñandú""","a,b\r\nc"\n2,,ñ\r\n3,x,""';
+    const bytes = new TextEncoder().encode(text);
+    const expected = parseCsv(text);
+    for (let cut = 0; cut <= bytes.length; cut++) {
+      async function* chunks() {
+        yield bytes.slice(0, cut);
+        yield bytes.slice(cut);
+      }
+      const rows: string[][] = [];
+      for await (const r of parseCsvStream(chunks())) rows.push(r);
+      expect(rows).toEqual(expected);
+    }
   });
 });
 

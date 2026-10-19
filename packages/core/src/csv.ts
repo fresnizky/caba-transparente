@@ -62,6 +62,102 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
+const QUOTE = 34;
+const COMMA = 44;
+const LF = 10;
+const CR = 13;
+
+/**
+ * Streaming version of parseCsv, for files that do not fit in memory: yields one record at a time. Takes text or
+ * UTF-8 bytes (a multibyte character may be split between chunks).
+ */
+export async function* parseCsvStream(chunks: AsyncIterable<string | Uint8Array>): AsyncGenerator<string[]> {
+  const decoder = new TextDecoder();
+  let row: string[] = [];
+  let field = "";
+  let quoted = false;
+  // A closing quote was the last thing seen: the next character says whether it was an escaped quote ("").
+  let afterQuote = false;
+  let skipLf = false;
+  for await (const chunk of chunks) {
+    const s = typeof chunk === "string" ? chunk : decoder.decode(chunk, { stream: true });
+    // Start of the text of the current field not yet copied to `field`.
+    let start = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      if (skipLf) {
+        skipLf = false;
+        if (c === LF) {
+          start = i + 1;
+          continue;
+        }
+      }
+      if (quoted) {
+        if (c === QUOTE) {
+          field += s.slice(start, i);
+          quoted = false;
+          afterQuote = true;
+          start = i + 1;
+        }
+        continue;
+      }
+      if (afterQuote) {
+        afterQuote = false;
+        if (c === QUOTE) {
+          field += '"';
+          quoted = true;
+          start = i + 1;
+          continue;
+        }
+      }
+      if (c === QUOTE) {
+        field += s.slice(start, i);
+        quoted = true;
+        start = i + 1;
+      } else if (c === COMMA) {
+        row.push(field + s.slice(start, i));
+        field = "";
+        start = i + 1;
+      } else if (c === LF || c === CR) {
+        row.push(field + s.slice(start, i));
+        yield row;
+        row = [];
+        field = "";
+        start = i + 1;
+        skipLf = c === CR;
+      }
+    }
+    field += s.slice(start);
+  }
+  field += decoder.decode();
+  if (field || row.length) {
+    row.push(field);
+    yield row;
+  }
+}
+
+/** Description of a processed CSV, written next to it as <file>.meta.json. Keys in Spanish: it is published. */
+export interface ProcessedMeta {
+  titulo: string;
+  descripcion: string;
+  /** Official page of the source. */
+  fuente: string;
+  licencia: string;
+  /** Raw files it was built from, as in manifest.jsonl. */
+  originales: { path: string; url: string; sha256: string }[];
+  /** What each column holds, in order. */
+  columnas: Record<string, string>;
+  notas?: string[];
+}
+
+/** Writes data/processed/<source>/<file>.meta.json. Returns the path. */
+export async function writeProcessedMeta(source: string, filename: string, meta: ProcessedMeta): Promise<string> {
+  const path = join(PROCESSED_DIR, source, `${filename}.meta.json`);
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, `${JSON.stringify(meta, null, 2)}\n`);
+  return path;
+}
+
 /** Reads a CSV from data/processed/<source>/<file> as rows keyed by column name. Empty if missing. */
 export async function readProcessed(source: string, filename: string): Promise<Row[]> {
   const path = join(PROCESSED_DIR, source, filename);

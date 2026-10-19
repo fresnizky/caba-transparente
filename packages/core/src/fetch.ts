@@ -10,7 +10,7 @@
 
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { gunzipSync, gzipSync } from "node:zlib";
 
@@ -43,17 +43,24 @@ export interface ManifestEntry {
   sha256: string;
   bytes: number;
   gzip: boolean;
+  /** Server validators, sent back on the next download so an unchanged file is not downloaded again. */
+  last_modified?: string;
+  etag?: string;
 }
 
-/** HTTP request with retries and a short pause, so we do not overload the servers. */
+/**
+ * HTTP request with retries and a short pause, so we do not overload the servers. A 304 (answer to a conditional
+ * request) is returned, not retried. `init.signal` replaces the default 2-minute timeout.
+ */
 export async function get(url: string, init: RequestInit = {}, retries = 3): Promise<Response> {
   const headers = new Headers(init.headers);
   if (!headers.has("User-Agent")) headers.set("User-Agent", USER_AGENT);
 
   for (let attempt = 0; ; attempt++) {
     try {
-      const resp = await fetch(url, { ...init, headers, signal: AbortSignal.timeout(120_000), proxy: proxyFor(url) });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status} en ${url}`);
+      const signal = init.signal ?? AbortSignal.timeout(120_000);
+      const resp = await fetch(url, { ...init, headers, signal, proxy: proxyFor(url) });
+      if (!resp.ok && resp.status !== 304) throw new Error(`HTTP ${resp.status} en ${url}`);
       await sleep(500);
       return resp;
     } catch (err) {
@@ -139,28 +146,87 @@ export async function archive(
   const dayDir = join(sourceDir, now.toISOString().slice(0, 10));
   await mkdir(dayDir, { recursive: true });
   const compressed = bytes.length > GZIP_THRESHOLD;
-  // data/raw is append-only: if a different version was already archived that day, the new one gets the time.
-  let path = join(dayDir, filename + (compressed ? ".gz" : ""));
-  if (existsSync(path)) {
-    const time = now.toISOString().slice(11, 19).replaceAll(":", "");
-    const dot = filename.lastIndexOf(".");
-    const timed = dot > 0 ? `${filename.slice(0, dot)}.${time}${filename.slice(dot)}` : `${filename}.${time}`;
-    path = join(dayDir, timed + (compressed ? ".gz" : ""));
-  }
+  const path = newRawPath(dayDir, filename, compressed, now);
   await writeFile(path, compressed ? gzipSync(bytes) : bytes);
-
-  const entry: ManifestEntry = {
-    filename,
-    path: relative(ROOT, path),
-    url,
-    fetched_at: `${now.toISOString().slice(0, 19)}Z`,
-    sha256,
-    bytes: bytes.length,
-    gzip: compressed,
-  };
-  await appendFile(join(sourceDir, "manifest.jsonl"), `${JSON.stringify(entry)}\n`);
-  latest.set(filename, entry);
+  await logDownload(source, { filename, ...manifestFields(path, now), url, sha256, bytes: bytes.length, gzip: compressed });
   return path;
+}
+
+/** Where a new version of `filename` goes. data/raw is append-only: a second version on the same day gets the time. */
+function newRawPath(dayDir: string, filename: string, compressed: boolean, now: Date): string {
+  const ext = compressed ? ".gz" : "";
+  const path = join(dayDir, filename + ext);
+  if (!existsSync(path)) return path;
+  const time = now.toISOString().slice(11, 19).replaceAll(":", "");
+  const dot = filename.lastIndexOf(".");
+  const timed = dot > 0 ? `${filename.slice(0, dot)}.${time}${filename.slice(dot)}` : `${filename}.${time}`;
+  return join(dayDir, timed + ext);
+}
+
+async function logDownload(source: string, entry: ManifestEntry): Promise<void> {
+  await appendFile(join(RAW_DIR, source, "manifest.jsonl"), `${JSON.stringify(entry)}\n`);
+  (await latestEntries(source)).set(entry.filename, entry);
+}
+
+const manifestFields = (path: string, now: Date) => ({ path: relative(ROOT, path), fetched_at: `${now.toISOString().slice(0, 19)}Z` });
+
+// A streamed download may take long (2.6 GB): this is the limit for the whole transfer, not for the first byte.
+const STREAM_TIMEOUT_MS = 2 * 60 * 60_000;
+
+/**
+ * Downloads `url` straight to data/raw/<source>/, computing sha256 and gzipping on the way, for files that do not
+ * fit in memory (the BAC CSVs weigh up to 2.6 GB). Sends the server validators of the last download
+ * (`If-None-Match`, `If-Modified-Since`): on a 304 nothing is downloaded. If the content turns out identical to
+ * the last version, nothing is stored. Returns the path, or null if the file did not change.
+ */
+export async function streamAndArchive(source: string, url: string, filename: string, retries = 3): Promise<string | null> {
+  const last = (await latestEntries(source)).get(filename);
+  const headers = new Headers();
+  if (last?.etag) headers.set("If-None-Match", last.etag);
+  if (last?.last_modified) headers.set("If-Modified-Since", last.last_modified);
+
+  const now = new Date();
+  const dayDir = join(RAW_DIR, source, now.toISOString().slice(0, 10));
+  await mkdir(dayDir, { recursive: true });
+  const partial = join(dayDir, `.${filename}.partial`);
+
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const resp = await get(url, { headers, signal: AbortSignal.timeout(STREAM_TIMEOUT_MS) });
+      if (resp.status === 304) return null;
+      if (!resp.body) throw new Error(`Respuesta sin cuerpo en ${url}`);
+
+      const hash = createHash("sha256");
+      let bytes = 0;
+      const tap = new TransformStream<Uint8Array, ArrayBufferView | ArrayBuffer>({
+        transform(chunk, controller) {
+          hash.update(chunk);
+          bytes += chunk.length;
+          controller.enqueue(chunk);
+        },
+      });
+      await Bun.write(partial, new Response(resp.body.pipeThrough(tap).pipeThrough(new CompressionStream("gzip"))));
+      const sha256 = hash.digest("hex");
+
+      if (last?.sha256 === sha256) {
+        await rm(partial);
+        return null;
+      }
+      const path = newRawPath(dayDir, filename, true, now);
+      await rename(partial, path);
+      const entry: ManifestEntry = { filename, ...manifestFields(path, now), url, sha256, bytes, gzip: true };
+      const lastModified = resp.headers.get("last-modified");
+      const etag = resp.headers.get("etag");
+      if (lastModified) entry.last_modified = lastModified;
+      if (etag) entry.etag = etag;
+      await logDownload(source, entry);
+      return path;
+    } catch (err) {
+      await rm(partial, { force: true });
+      if (attempt >= retries - 1) throw err;
+      await sleep(2 ** attempt * 10_000);
+    }
+  }
 }
 
 /** Downloads `url` and archives it under `source`. */
@@ -187,6 +253,17 @@ export async function fetchOrReuse(source: string, url: string, filename: string
 export async function readRaw(path: string): Promise<Buffer> {
   const data = await readFile(path);
   return path.endsWith(".gz") ? gunzipSync(data) : data;
+}
+
+/** Streams a raw file, gunzipping if needed, for files that do not fit in memory. */
+export function readRawStream(path: string): ReadableStream<Uint8Array> {
+  const file = Bun.file(path).stream();
+  return path.endsWith(".gz") ? file.pipeThrough(new DecompressionStream("gzip")) : file;
+}
+
+/** Latest manifest entry of `filename`, or undefined. */
+export async function latestEntry(source: string, filename: string): Promise<ManifestEntry | undefined> {
+  return (await latestEntries(source)).get(filename);
 }
 
 /** Absolute path of the latest archived version of `filename`, or null. */

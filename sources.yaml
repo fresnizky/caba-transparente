@@ -8,9 +8,10 @@ fuentes:
     nombre: Buenos Aires Compras (OCDS)
     organismo: Ministerio de Hacienda y Finanzas
     url: https://data.buenosaires.gob.ar/dataset/buenos-aires-compras
-    formato: CSV (OCDS aplanado), JSON
+    formato: CSV (OCDS aplanado), JSON, XLSX
     frecuencia: trimestral
-    estado: relevado
+    datos_personales: nombre y CUIT de proveedores personas humanas; nombres de pacientes en títulos de compras de hospitales (ver D-04)
+    estado: activo
 
   - id: boletin-oficial
     nombre: Boletín Oficial de la Ciudad

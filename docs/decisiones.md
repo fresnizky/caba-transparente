@@ -44,7 +44,7 @@ Dónde viven los originales: ver D-05.
 
 - `autoridades-superiores`: dataset con CUIL, edad y mail de cada funcionario.
 - `boletin-oficial`: PDFs de publicación obligatoria. Falta verificar cuántos actos traen DNI o CUIL.
-- `compras-bac`: CUIT de proveedores que son personas humanas (20, 23, 24, 27).
+- `compras-bac`: nombre y CUIT de proveedores que son personas humanas (20, 23, 24, 27), y nombres de pacientes (a veces con historia clínica o DNI) en los títulos de compras de hospitales: unos 7.300 procesos. Mientras D-04 siga abierta, los datos procesados de esta fuente no se publican.
 
 **Opciones a evaluar:** distinguir publicaciones oficiales obligatorias (copia fiel) de datasets con columnas que exceden la finalidad (versión redactada). En ambos casos se guarda en el manifest el sha256 del original.
 

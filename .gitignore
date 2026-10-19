@@ -15,3 +15,6 @@ data/raw/**
 !data/raw/.gitkeep
 !data/raw/**/manifest.jsonl
 !data/raw/**/archive-org.jsonl
+
+# Processed BAC data is not published until D-04 is decided: hospital purchase titles carry patient names.
+data/processed/compras-bac/

@@ -13,23 +13,39 @@ Primer relevamiento, hecho el 18/10/2026 consultando los portales directamente (
 
 Dataset `buenos-aires-compras` (Ministerio de Hacienda y Finanzas, actualización trimestral `R/P3M`). Publicado bajo el estándar Open Contracting (OCDS 1.1).
 
+Tamaños y fechas según el CDN el 19/10/2026 (`Last-Modified` 15/09/2026 en todos, salvo `Metadata_OCDS.xlsx`, de 2021):
+
 | Archivo | Tamaño | Contenido |
 |---|---|---|
-| `award.csv` | 616 MB | Adjudicaciones, OCDS aplanado. **732.064 filas, de 2014 a 2026** |
-| `tender.csv` | 621 MB | Convocatorias |
-| `contracts.csv` | 423 MB | Contratos |
-| `parties.csv` | 256 MB | Participantes |
-| `bac.csv` | 2,6 GB | Todo junto |
+| `award.csv` | 616 MB | Adjudicaciones. **732.064 filas, una por ítem**: 312.915 adjudicaciones, de 2014 a 2026 |
+| `tender.csv` | 621 MB | Convocatorias. 623.414 filas (ítems), 442.124 lotes, 82.115 procesos |
+| `contracts.csv` | 423 MB | Contratos. 744.041 filas, de 2010 a 2026 |
+| `parties.csv` | 256 MB | Participantes: unidades compradoras y proveedores. 905.212 filas |
+| `bac.csv` | 2,6 GB | Todo junto. El CDN respondió 503 cada vez que se lo pidió (ver abajo) |
+| `bac_anual.csv`, `bac_anual.xlsx` | 133 MB, 22 MB | Versiones «anuales», sin relevar |
 | `bac_anual.json` | 85 MB | Paquete OCDS en JSON, pero **solo de enero a junio de 2022**, aunque se llame «anual» |
+| `Metadata_OCDS.xlsx` | 25 KB | Diccionario de campos |
 
-Adjudicaciones por año en `award.csv`: 2014: 8.892 · 2015: 26.058 · 2016: 38.410 · 2017: 50.683 · 2018: 70.099 · 2019: 66.931 · 2020: 46.318 · 2021: 61.340 · 2022: 74.572 · 2023: 96.383 · 2024: 66.723 · 2025: 84.989 · 2026: 40.664 (hasta la publicación de septiembre).
+Adjudicaciones por año (distintas, no filas): 2014: 5.690 · 2015: 19.991 · 2016: 23.021 · 2017: 26.724 · 2018: 26.838 · 2019: 28.494 · 2020: 20.418 · 2021: 25.259 · 2022: 26.566 · 2023: 29.106 · 2024: 29.335 · 2025: 32.101 · 2026: 19.370 (hasta la publicación de septiembre) · 2 con fecha `NaT`.
 
-Particularidades:
+Estructura:
 
+- **Una fila por ítem.** La adjudicación (o la convocatoria) se repite en cada ítem, con el mismo monto: sumar filas multiplica los montos.
+- **Proceso, lote y adjudicación.** `tender/id` (`10002-0050-LPU23`) es el proceso de compra. Cada `ocid` (`ocds-bulbcf-10002-0050-LPU23-1`, `-2`…) es un lote del proceso, con su propio monto estimado, y tiene a lo sumo una adjudicación con un proveedor. En `award.csv` no hay lotes con montos o proveedores distintos entre sus ítems.
 - `buyer` viene vacío. El comprador es `tender.procuringEntity`: un código de unidad ejecutora (`CABA-UE-10002`) y su nombre.
+- **Monedas:** ARS, USD y EUR. En muchas adjudicaciones la moneda viene vacía, con montos grandes (en 2025, unos 172 mil millones sin moneda).
+- `tender/value/amount` vale 0 en 83.211 filas (por ejemplo, concesiones).
+- `tender/mainProcurementCategory` dice `works` (obras) en el 82 % de las filas, también en compras de bienes: no es confiable.
 - El CUIT del proveedor viene en dos formatos (`30-54168237-2` y `27035690218`): se normaliza con `normalizeCuit()`.
-- Hay proveedores que son personas humanas (CUIT 27…).
 - El `ocid` tiene prefijo `ocds-bulbcf-`.
+
+Datos personales (D-04):
+
+- **Proveedores personas humanas:** 933 de 4.524 proveedores distintos (32.384 adjudicaciones) tienen CUIT 20, 23, 24 o 27. `award.csv`, `parties.csv` y `contracts.csv` traen su nombre y CUIT. En `contracts.csv`, `signatories` es el proveedor, no un funcionario.
+- **Pacientes en los títulos:** muchas compras de hospitales llevan en el título el nombre del paciente para el que se compra (prótesis, medicamentos), a veces con número de historia clínica o DNI. Unos 7.300 procesos (9 %) tienen marcadores como «PTE», «PACIENTE», «HC» o «DNI»; puede haber más sin marcador. Es un dato de salud asociado a una persona.
+- `parties.csv` no trae domicilio ni contacto de los proveedores: los domicilios y mails son de las unidades compradoras.
+
+Disponibilidad: el 19/10/2026, después de bajar unos 2 GB en secuencia, el CDN y el portal respondieron 503 y 502 durante unos 12 minutos. Cuando volvieron, `bac.csv` siguió respondiendo 503 (a `HEAD` y a pedidos parciales) mientras el resto respondía bien.
 
 Para completar los datos de cada proveedor sirve el Registro Nacional de Sociedades (datos.jus.gob.ar, ZIP de ~118 MB, actualizado cada uno o dos meses), igual que en Mendoza.
 
