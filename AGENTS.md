@@ -27,7 +27,7 @@ Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Bue
 La decisión de fondo está abierta (D-04 en `docs/decisiones.md`). Mientras tanto:
 
 - Se publican nombre, cargo y organismo de funcionarios (actos públicos). Los datos procesados y la web nunca muestran DNI, CUIL, edad, domicilio, mail personal ni familiares.
-- Los originales de fuentes que traen esos datos quedan solo en `data/raw/` local: no se suben a R2 ni a archive.org. La fuente va en `RAW_EXCLUDED` (`packages/scrapers/src/raw-excluded.ts`) en el mismo commit que agrega su recolector.
+- Los originales de fuentes que traen esos datos quedan solo en `data/raw/` local: no se suben a R2 ni a archive.org. La fuente va en `RAW_EXCLUDED` (`packages/scrapers/src/raw-excluded.ts`) en el mismo commit que agrega su recolector. La excepción son las publicaciones oficiales obligatorias, como el Boletín Oficial: se guardan como copia fiel (D-04), y sus datos procesados no extraen nada del texto con datos personales.
 - A los proveedores que son personas humanas (CUIT 20, 23, 24, 27) no se los perfila.
 - Solo se usa lo que el Estado publica. Nunca pasar un login o un captcha, ni guardar datos expuestos por error.
 

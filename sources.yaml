@@ -19,7 +19,8 @@ fuentes:
     url: https://api-restboletinoficial.buenosaires.gob.ar/api/doc/
     formato: API REST (JSON) y PDF
     frecuencia: diaria (días hábiles)
-    estado: relevado
+    datos_personales: CUIL y DNI en normas de personal, compras, nóminas y edictos; copia fiel, sumarios de edictos ocultos (ver D-04)
+    estado: activo
 
   - id: autoridades-superiores
     nombre: Autoridades superiores y funcionarios
