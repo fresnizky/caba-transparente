@@ -21,7 +21,7 @@ Tamaños y fechas según el CDN el 19/10/2026 (`Last-Modified` 15/09/2026 en tod
 | `tender.csv` | 621 MB | Convocatorias. 623.414 filas (ítems), 442.124 lotes, 82.115 procesos |
 | `contracts.csv` | 423 MB | Contratos. 744.041 filas, de 2010 a 2026 |
 | `parties.csv` | 256 MB | Participantes: unidades compradoras y proveedores. 905.212 filas |
-| `bac.csv` | 2,6 GB | Todo junto. El CDN respondió 503 cada vez que se lo pidió (ver abajo) |
+| `bac.csv` | 2,6 GB | Todo junto: 1.163.830 filas de 99 columnas, los mismos 82.115 procesos de 2014 a 2026. El portal dice «desde el 2011», pero no trae nada anterior a 2014. Bajado a mano (ver abajo) |
 | `bac_anual.csv`, `bac_anual.xlsx` | 133 MB, 22 MB | Versiones «anuales», sin relevar |
 | `bac_anual.json` | 85 MB | Paquete OCDS en JSON, pero **solo de enero a junio de 2022**, aunque se llame «anual» |
 | `Metadata_OCDS.xlsx` | 25 KB | Diccionario de campos |
@@ -45,7 +45,7 @@ Datos personales (D-04):
 - **Pacientes en los títulos:** muchas compras de hospitales llevan en el título el nombre del paciente para el que se compra (prótesis, medicamentos), a veces con número de historia clínica o DNI. Es un dato de salud asociado a una persona. Las formas más comunes son «PTE.», «PCTE:», «PACIENTE», «PAC.», «HC Nº», «DNI», «AYUDA MÉDICA» o «AY. MÉD.», «A.M.», y apellido con inicial seguido del DNI sin rótulo. Con esas marcas se ocultan 10.974 de 82.115 procesos (13,4 %); en una revisión a mano de títulos de hospitales con forma «APELLIDO, NOMBRE» apareció alguno sin ninguna marca (D-04).
 - `parties.csv` no trae domicilio ni contacto de los proveedores: los domicilios y mails son de las unidades compradoras.
 
-Disponibilidad: el 19/10/2026, después de bajar unos 2 GB en secuencia, el CDN y el portal respondieron 503 y 502 durante unos 12 minutos. Cuando volvieron, `bac.csv` siguió respondiendo 503 (a `HEAD` y a pedidos parciales) mientras el resto respondía bien.
+Disponibilidad: el 19/10/2026, después de bajar unos 2 GB en secuencia, el CDN y el portal respondieron 503 y 502 durante unos 12 minutos. Cuando volvieron, `bac.csv` siguió respondiendo 503 (a `HEAD` y a pedidos parciales) mientras el resto respondía bien. El 20/10 siguió igual: `HEAD` daba 503 en menos de un segundo y `GET` dejaba la conexión abierta sin respuesta. No es un bloqueo: el CDN (Varnish) no logra traer el archivo de su origen cuando no lo tiene en caché. Una descarga desde el navegador lo cargó en la caché (dura 10 minutos, `max-age=600`) y desde ahí respondía bien a cualquier pedido. Ese día se archivó la copia del navegador, con nota en el manifest; los otros archivos no necesitaron esto.
 
 Para completar los datos de cada proveedor sirve el Registro Nacional de Sociedades (datos.jus.gob.ar, ZIP de ~118 MB, actualizado cada uno o dos meses), igual que en Mendoza.
 

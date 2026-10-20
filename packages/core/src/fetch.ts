@@ -46,6 +46,8 @@ export interface ManifestEntry {
   /** Server validators, sent back on the next download so an unchanged file is not downloaded again. */
   last_modified?: string;
   etag?: string;
+  /** How the file was obtained, when it was not by the collector (for example, downloaded by hand). */
+  note?: string;
 }
 
 /**
