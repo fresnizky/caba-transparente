@@ -34,18 +34,10 @@ import {
   uploadToItem,
 } from "@ct/core";
 
+import { RAW_EXCLUDED } from "./raw-excluded.ts";
+
 // Public repository the archive.org items point to (not created yet).
 const REPO = "https://github.com/fresnizky/caba-transparente";
-
-/**
- * Sources whose official documents carry personal data. While D-04 is open their originals stay in data/raw
- * only: nothing is uploaded to an item and nothing is sent to the Wayback Machine (which keeps the original as
- * published).
- */
-const WAYBACK_EXCLUDED: Record<string, string> = {
-  "autoridades-superiores": "the official CSV has CUIL, age and email of every official (D-04)",
-  "compras-bac": "the official CSVs have name and CUIT of suppliers who are individuals (D-04)",
-};
 
 // Save Page Now allows 7 captures per minute for an authenticated account.
 const CAPTURE_PAUSE_MS = 9000;
@@ -137,8 +129,8 @@ export async function run(args: string[]): Promise<void> {
   for (const source of sources) {
     const manifest = await readManifest(source);
     console.log(`${source}: ${manifest.length} archivos`);
-    if (WAYBACK_EXCLUDED[source]) {
-      console.log(`  no se copia a archive.org: ${WAYBACK_EXCLUDED[source]}`);
+    if (RAW_EXCLUDED[source]) {
+      console.log(`  no se copia a archive.org: ${RAW_EXCLUDED[source]}`);
       continue;
     }
 
