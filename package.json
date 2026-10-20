@@ -8,6 +8,7 @@
   "scripts": {
     "scrape": "bun packages/scrapers/src/cli.ts",
     "archivar": "bun packages/scrapers/src/archive-org.ts",
+    "subir-r2": "bun --env-file=.env.r2 packages/scrapers/src/r2.ts",
     "probar-acceso": "bun packages/scrapers/src/check-access.ts",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome check .",

@@ -44,7 +44,7 @@ Dónde viven los originales: ver D-05.
 
 - `autoridades-superiores`: dataset con CUIL, edad y mail de cada funcionario.
 - `boletin-oficial`: PDFs de publicación obligatoria. Falta verificar cuántos actos traen DNI o CUIL.
-- `compras-bac`: nombre y CUIT de proveedores que son personas humanas (20, 23, 24, 27), y nombres de pacientes (a veces con historia clínica o DNI) en los títulos de compras de hospitales. Para los títulos se decidió el 19/10/2026: se ocultan los que tienen marcas de un paciente (PTE, PCTE, PACIENTE, PAC, HC, DNI, CUIL, ayuda médica y sus abreviaturas, inicial seguida de un DNI) y la columna `titulo_oculto` lo indica. Son unos 11.000 procesos (13 %). La detección por marcas deja pasar algunos títulos sin marca; cuando aparece una marca nueva se agrega a `PERSONAL_DATA` (`compras-bac.ts`) y se reprocesa desde `data/raw/`.
+- `compras-bac`: nombre y CUIT de proveedores que son personas humanas (20, 23, 24, 27), y nombres de pacientes (a veces con historia clínica o DNI) en los títulos de compras de hospitales. Para los títulos se decidió el 19/10/2026: se ocultan los que tienen marcas de un paciente (PTE, PCTE, PACIENTE, PAC, HC, DNI, CUIL, ayuda médica y sus abreviaturas, inicial seguida de un DNI) y la columna `titulo_oculto` lo indica. Son unos 11.000 procesos (13 %). La detección por marcas deja pasar algunos títulos sin marca; cuando aparece una marca nueva se agrega a `PERSONAL_DATA` (`compras-bac.ts`) y se reprocesa desde `data/raw/`. Por eso los procesados de esta fuente se publican en R2 y no en git (20/10/2026): en R2 la versión corregida reemplaza a la anterior, mientras que git conserva en su historial cualquier nombre que se haya escapado.
 
 **Opciones a evaluar:** distinguir publicaciones oficiales obligatorias (copia fiel) de datasets con columnas que exceden la finalidad (versión redactada). En ambos casos se guarda en el manifest el sha256 del original.
 
@@ -59,6 +59,7 @@ Dónde viven los originales: ver D-05.
 **Fecha:** 18/10/2026
 
 - **R2 es la copia principal.** Cada original se sube con la misma ruta que figura en `manifest.jsonl` (`data/raw/<fuente>/<fecha>/<archivo>`), así el manifest no depende del proveedor y migrar es copiar los archivos (por ejemplo con `rclone`) y cambiar la configuración.
+- **Los datos procesados también se publican en R2** (`data/processed/<fuente>/...`, misma ruta que en el repo). Ahí se reemplazan cuando se reprocesan. Agregado el 20/10/2026.
 - **archive.org es la segunda copia** (`bun run archivar`): un ítem por fuente y mes, y la captura de la URL oficial en la Wayback Machine.
 - La copia local en `data/raw/` es un caché de trabajo, no un respaldo.
 

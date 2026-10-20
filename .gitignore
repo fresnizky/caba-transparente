@@ -8,6 +8,9 @@ dist/
 # archive.org S3 keys (docs/procesos/datos-y-archivo.md)
 .env.archive-org
 
+# Cloudflare R2 keys (D-05)
+.env.r2
+
 # Raw files do not go to git (docs/decisiones.md, D-03): only their manifests do.
 # The originals live in Cloudflare R2 and archive.org (D-05); data/raw is a local working cache.
 data/raw/**
@@ -16,5 +19,6 @@ data/raw/**
 !data/raw/**/manifest.jsonl
 !data/raw/**/archive-org.jsonl
 
-# Processed BAC data is not published until D-04 is decided: hospital purchase titles carry patient names.
+# Processed BAC data is published in R2 only (D-04): titles naming a patient are hidden by markers, and if one slips
+# through, R2 replaces the file while git would keep it in its history.
 data/processed/compras-bac/
