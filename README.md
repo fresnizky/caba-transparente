@@ -19,7 +19,7 @@ flowchart TD
 1. **Recolector.** Un script por fuente en `packages/scrapers/src/sources/<id>.ts`.
 2. **Archivo original.** Se guarda tal cual llegó en `data/raw/<fuente>/<fecha>/`, con su sha256 en `manifest.jsonl`. Los originales no van a git: viven en Cloudflare R2; los manifests sí van a git ([decisiones D-03 y D-05](docs/decisiones.md)).
 3. **Copia en archive.org.** El original se sube a un ítem de archive.org y la Wayback Machine captura la URL oficial.
-4. **Datos normalizados.** CSV en `data/processed/<fuente>/`, con su diccionario `<archivo>.meta.json`.
+4. **Datos normalizados.** CSV en `data/processed/<fuente>/`, con su diccionario `<archivo>.meta.json`. Tampoco van a git: se publican en `https://archivo.caba-transparente.com.ar/data/processed/<fuente>/` (por ejemplo [`compras-bac/procesos/2026.csv`](https://archivo.caba-transparente.com.ar/data/processed/compras-bac/procesos/2026.csv)).
 
 ## Estructura
 
