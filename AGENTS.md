@@ -15,7 +15,7 @@ Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Bue
 ## Datos
 
 - Descargar siempre con `get()` + `archive()` o `fetchAndArchive()` de `@ct/core`: mandan User-Agent de navegador, reintentan y registran cada descarga en `data/raw/<id>/manifest.jsonl` con su sha256.
-- `data/raw/` es de solo agregar: nunca editar ni borrar un original. Los originales no van a git; los `manifest.jsonl` y `archive-org.jsonl` sí (decisión D-03).
+- `data/raw/` es de solo agregar: nunca editar ni borrar un original. Ni los originales ni los datos procesados van a git: se publican en R2 con `bun run subir-r2`. A git van solo los `manifest.jsonl`, los `archive-org.jsonl` y `data/curado/` (decisión D-03).
 - Archivos que no entran en memoria (los CSV de Buenos Aires Compras pesan entre 250 MB y 2,6 GB): procesar en streaming.
 - Datos normalizados: CSV UTF-8 con `writeProcessed()`, columnas en `snake_case`, montos en pesos nominales. Cada CSV lleva su `<archivo>.meta.json`.
 - Cada recolector es idempotente: correrlo dos veces seguidas no duplica nada.
