@@ -16,7 +16,7 @@
 
 Necesita las claves S3 de archive.org (https://archive.org/account/s3.php) en `IA_ACCESS_KEY` e `IA_SECRET_KEY`. Se pueden guardar en `.env.archive-org` (no se commitea) y correr `bun --env-file=.env.archive-org run archivar`. Es idempotente y retomable: `--max-minutos`, `--max-capturas`, `--solo-items`, `--solo-wayback`.
 
-**Datos personales:** lo que se sube a archive.org es, en la práctica, irreversible, y la Wayback guarda siempre el original. Qué se archiva de las fuentes con datos personales está pendiente (D-04 en `docs/decisiones.md`). Hasta que se decida, esas fuentes van en `WAYBACK_EXCLUDED` (`packages/scrapers/src/archive-org.ts`) y no se corre `archivar` sobre ellas.
+**Datos personales:** lo que se sube a archive.org es, en la práctica, irreversible, y la Wayback guarda siempre el original. Qué se archiva de las fuentes con datos personales está pendiente (D-04 en `docs/decisiones.md`). Hasta que se decida, esas fuentes van en `WAYBACK_EXCLUDED` (`packages/scrapers/src/archive-org.ts`) y `archivar` las saltea: no sube sus originales a ningún ítem ni pide captura a la Wayback Machine.
 
 ## `data/processed/<fuente>/`: los normalizados
 

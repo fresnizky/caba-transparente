@@ -26,3 +26,9 @@ export function personKind(cuit: string): "juridica" | "humana" | null {
   if (/^(20|23|24|27)/.test(cuit)) return "humana";
   return null;
 }
+
+/**
+ * Copy of `s` that does not keep alive the string it was cut from. In Bun (JavaScriptCore) a substring points into
+ * its parent, so keeping a short field cut from a 64 KB chunk keeps the whole chunk: for big files, copy what is kept.
+ */
+export const detach = (s: string) => Buffer.from(s, "utf8").toString("utf8");

@@ -38,11 +38,13 @@ import {
 const REPO = "https://github.com/fresnizky/caba-transparente";
 
 /**
- * Sources whose official documents carry personal data. The Wayback Machine keeps the original as
- * published, so these are never sent there. What we archive for them is pending (D-04).
+ * Sources whose official documents carry personal data. While D-04 is open their originals stay in data/raw
+ * only: nothing is uploaded to an item and nothing is sent to the Wayback Machine (which keeps the original as
+ * published).
  */
 const WAYBACK_EXCLUDED: Record<string, string> = {
   "autoridades-superiores": "the official CSV has CUIL, age and email of every official (D-04)",
+  "compras-bac": "the official CSVs have name and CUIT of suppliers who are individuals (D-04)",
 };
 
 // Save Page Now allows 7 captures per minute for an authenticated account.
@@ -135,6 +137,10 @@ export async function run(args: string[]): Promise<void> {
   for (const source of sources) {
     const manifest = await readManifest(source);
     console.log(`${source}: ${manifest.length} archivos`);
+    if (WAYBACK_EXCLUDED[source]) {
+      console.log(`  no se copia a archive.org: ${WAYBACK_EXCLUDED[source]}`);
+      continue;
+    }
 
     if (!flags.has("--solo-wayback")) {
       const uploaded = await uploadItems(auth, source, manifest, await readArchiveOrgRecords(source), deadline);
@@ -142,10 +148,6 @@ export async function run(args: string[]): Promise<void> {
     }
 
     if (stopCaptures) continue;
-    if (WAYBACK_EXCLUDED[source]) {
-      console.log(`  sin Wayback: ${WAYBACK_EXCLUDED[source]}`);
-      continue;
-    }
     for (const entry of pendingCaptures(manifest, await readArchiveOrgRecords(source))) {
       if (captures >= maxCaptures || Date.now() > deadline) {
         console.log("  tope de capturas o de tiempo de la corrida: el resto sigue en la próxima");

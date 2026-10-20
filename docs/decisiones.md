@@ -44,7 +44,7 @@ Dónde viven los originales: ver D-05.
 
 - `autoridades-superiores`: dataset con CUIL, edad y mail de cada funcionario.
 - `boletin-oficial`: PDFs de publicación obligatoria. Falta verificar cuántos actos traen DNI o CUIL.
-- `compras-bac`: CUIT de proveedores que son personas humanas (20, 23, 24, 27).
+- `compras-bac`: nombre y CUIT de proveedores que son personas humanas (20, 23, 24, 27), y nombres de pacientes (a veces con historia clínica o DNI) en los títulos de compras de hospitales. Para los títulos se decidió el 19/10/2026: se ocultan los que tienen marcas de un paciente (PTE, PCTE, PACIENTE, PAC, HC, DNI, CUIL, ayuda médica y sus abreviaturas, inicial seguida de un DNI) y la columna `titulo_oculto` lo indica. Son unos 11.000 procesos (13 %). La detección por marcas deja pasar algunos títulos sin marca; cuando aparece una marca nueva se agrega a `PERSONAL_DATA` (`compras-bac.ts`) y se reprocesa desde `data/raw/`.
 
 **Opciones a evaluar:** distinguir publicaciones oficiales obligatorias (copia fiel) de datasets con columnas que exceden la finalidad (versión redactada). En ambos casos se guarda en el manifest el sha256 del original.
 
