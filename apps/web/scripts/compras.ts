@@ -7,6 +7,7 @@
  * - An award with no currency takes the one of its process (BAC leaves it empty in ~15 % of the awards).
  * - Individuals (CUIT 20, 23, 24, 27) only appear as a total: no list, no page, no name.
  * - Every amount also goes in constant pesos (`montoReal`), only for the months the IPC covers (inflacion.ts).
+ * - The yearly rows also carry the awards in other currencies converted to pesos (`otras`, cambio.ts), apart.
  */
 
 import { join } from "node:path";
@@ -27,6 +28,7 @@ import type {
   SupplierSummary,
   YearRow,
 } from "../src/types.ts";
+import type { Converter } from "./cambio.ts";
 import { csvFiles, readRows } from "./csv.ts";
 import type { Deflator } from "./inflacion.ts";
 
@@ -121,7 +123,22 @@ const pesos = (a: Award) => (isArs(a) ? (a.monto ?? 0) : 0);
 
 /** Sums in nominal and constant pesos. Without an index, constant pesos are null everywhere. */
 class Money {
-  constructor(private readonly deflator: Deflator | null) {}
+  constructor(
+    private readonly deflator: Deflator | null,
+    private readonly converter: Converter | null = null,
+  ) {}
+
+  /** An award in another currency, converted to nominal and constant pesos; null if it is in pesos or has no rate. */
+  converted(a: Award): Amount | null {
+    if (isArs(a) || !a.moneda || a.monto === null || !this.converter) return null;
+    const montoArs = this.converter.toPesos(a.monto, a.moneda, a.fecha);
+    if (montoArs === null) return null;
+    return { montoArs, montoReal: this.deflator ? this.deflator.real(montoArs, a.fecha) : null };
+  }
+
+  get converts(): boolean {
+    return this.converter !== null;
+  }
 
   /** Constant pesos of one award, or null if it is not in pesos or the index does not cover its month. */
   real(a: Award): number | null {
@@ -159,7 +176,18 @@ function byYear(money: Money, processes: Process[], awards: Award[]): YearRow[] 
   const rows = new Map<number, YearRow>();
   const row = (anio: number) => {
     let r = rows.get(anio);
-    if (!r) rows.set(anio, (r = { anio, procesos: 0, adjudicaciones: 0, montoArs: 0, montoReal: money.covers(anio) ? 0 : null }));
+    if (!r) {
+      const real = money.covers(anio) ? 0 : null;
+      r = {
+        anio,
+        procesos: 0,
+        adjudicaciones: 0,
+        montoArs: 0,
+        montoReal: real,
+        otras: money.converts ? { montoArs: 0, montoReal: real } : null,
+      };
+      rows.set(anio, r);
+    }
     return r;
   };
   for (const p of processes) {
@@ -173,6 +201,11 @@ function byYear(money: Money, processes: Process[], awards: Award[]): YearRow[] 
     r.adjudicaciones++;
     r.montoArs += pesos(a);
     if (r.montoReal !== null) r.montoReal += money.real(a) ?? 0;
+    const other = money.converted(a);
+    if (other && r.otras) {
+      r.otras.montoArs += other.montoArs;
+      if (r.otras.montoReal !== null) r.otras.montoReal += other.montoReal ?? 0;
+    }
   }
   return [...rows.values()].sort((a, b) => a.anio - b.anio);
 }
@@ -326,8 +359,15 @@ export interface ComprasPages {
   supplierDetails: SupplierDetail[];
 }
 
-export function buildCompras(processes: Process[], awards: Award[], origin: Origin, deflator: Deflator | null = null): ComprasPages {
-  const money = new Money(deflator);
+export function buildCompras(
+  processes: Process[],
+  awards: Award[],
+  origin: Origin,
+  deflator: Deflator | null = null,
+  converter: Converter | null = null,
+): ComprasPages {
+  const money = new Money(deflator, converter);
+  const cambio = converter && { fuente: converter.fuente, monedas: converter.monedas };
   const constantes = deflator && {
     indice: deflator.indice,
     region: deflator.region,
@@ -357,6 +397,7 @@ export function buildCompras(processes: Process[], awards: Award[], origin: Orig
       ...agencySummary(money, id, ps, as),
       origen: origin,
       constantes,
+      cambio,
       ultimoAnioCompleto,
       otrasMonedas,
       porAnio: byYear(money, ps, as),
@@ -379,6 +420,7 @@ export function buildCompras(processes: Process[], awards: Award[], origin: Orig
       ...supplierSummary(money, cuit, as),
       origen: origin,
       constantes,
+      cambio,
       ultimoAnioCompleto,
       otrasMonedas,
       porAnio: byYear(money, [], as),
@@ -426,6 +468,7 @@ export function buildCompras(processes: Process[], awards: Award[], origin: Orig
     summary: {
       origen: origin,
       constantes,
+      cambio,
       totales: {
         procesos: processes.length,
         adjudicaciones: awards.length,

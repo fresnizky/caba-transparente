@@ -12,6 +12,8 @@
   --color-link: #1f5fa8;
   --color-bar: #404040;
   --color-bar-soft: #a3a3a3;
+  --color-bar-other: #b7791f;
+  --color-bar-other-soft: #e3c27f;
 }
 
 @layer base {

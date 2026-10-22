@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { agencyName } from "../src/names.ts";
 import type { Origin } from "../src/types.ts";
+import { buildConverter } from "./cambio.ts";
 import { type Award, buildCompras, coverage, type Process, toAward, toProcess } from "./compras.ts";
 import { buildDeflator } from "./inflacion.ts";
 import { buildSenales } from "./senales.ts";
@@ -176,5 +177,38 @@ describe("constant pesos", () => {
       [2017, 1_000, 2_000],
     ]);
     expect(summary.totales).toMatchObject({ montoArs: 6_000, montoReal: 2_000 });
+  });
+});
+
+describe("other currencies in the yearly rows", () => {
+  const converter = buildConverter([
+    { periodo: "2017-01", moneda: "USD", promedio: 16 },
+    { periodo: "2017-01", moneda: "EUR", promedio: 17 },
+  ])!;
+  const deflator = buildDeflator(
+    Array.from({ length: 12 }, (_, i) => ({
+      periodo: `2017-${String(i + 1).padStart(2, "0")}`,
+      region: "GBA",
+      indice: i === 0 ? 100 : 200,
+    })),
+  )!;
+  const processes = [process({ id: "P-1", fecha: "2017-01-10", moneda: "USD" })];
+  const awards = [
+    award({ ocid: "o-1", procesoId: "P-1", fecha: "2017-01-10", monto: 10, moneda: "USD" }),
+    award({ ocid: "o-2", procesoId: "P-1", fecha: "2017-01-10", monto: 10, moneda: "EUR" }),
+    award({ ocid: "o-3", procesoId: "P-1", fecha: "2017-05-10", monto: 10, moneda: "USD" }),
+    award({ ocid: "o-4", procesoId: "P-1", fecha: "2017-01-10", monto: 100, moneda: "ARS" }),
+  ];
+
+  test("converts with the rate of the month, apart from the peso amounts, and skips months without a rate", () => {
+    const { summary } = buildCompras(processes, awards, origin, deflator, converter);
+    const y = summary.porAnio[0]!;
+    expect(y).toMatchObject({ anio: 2017, montoArs: 100, otras: { montoArs: 330, montoReal: 660 } });
+    expect(summary.cambio).toEqual({ fuente: "BCRA, Estadísticas Cambiarias", monedas: ["EUR", "USD"] });
+    expect(summary.totales.otrasMonedas).toEqual({ USD: 20, EUR: 10 });
+  });
+
+  test("without rates there is nothing converted", () => {
+    expect(buildCompras(processes, awards, origin).summary.porAnio[0]!.otras).toBeNull();
   });
 });

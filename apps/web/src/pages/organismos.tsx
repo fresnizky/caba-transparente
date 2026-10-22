@@ -112,8 +112,8 @@ export function OrganismoPage() {
 
       {o.porAnio.length > 1 && (
         <Section id="por-anio" title="Contratos adjudicados por año">
-          <YearChart rows={o.porAnio} lastComplete={o.ultimoAnioCompleto} pesos={p} />
-          <OtherCurrenciesNote amounts={o.otrasMonedas} />
+          <YearChart rows={o.porAnio} lastComplete={o.ultimoAnioCompleto} pesos={p} cambio={o.cambio} />
+          <OtherCurrenciesNote amounts={o.otrasMonedas} converted={o.cambio !== null} />
         </Section>
       )}
 

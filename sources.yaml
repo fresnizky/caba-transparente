@@ -69,3 +69,11 @@ fuentes:
     formato: CSV
     frecuencia: mensual
     estado: activo
+
+  - id: bcra-cotizaciones
+    nombre: Cotizaciones del dólar y el euro
+    organismo: Banco Central de la República Argentina
+    url: https://www.bcra.gob.ar/apis-banco-central/
+    formato: API REST (JSON)
+    frecuencia: diaria
+    estado: activo

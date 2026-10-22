@@ -14,7 +14,8 @@
  *
  * The processed data is not in git (D-04, D-05). Each source is read from the first folder of CT_DATA_DIR that has
  * it, and then from data/ in this checkout (data-dirs.ts). A source with no processed data leaves its pages empty.
- * Amounts in constant pesos need data/processed/indec-ipc (`bun run scrape indec-ipc`); without it they are null.
+ * Amounts in constant pesos need data/processed/indec-ipc (`bun run scrape indec-ipc`), and dollars and euros in the
+ * yearly chart need data/processed/bcra-cotizaciones (`bun run scrape bcra-cotizaciones`); without them they are null.
  */
 
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
@@ -25,6 +26,7 @@ import { parse as parseYaml } from "yaml";
 
 import type { NotPublished, Origin } from "../src/types.ts";
 import { buildBoletin } from "./boletin.ts";
+import { readConverter } from "./cambio.ts";
 import { ARCHIVE_URL, buildCatalog, readManifest } from "./catalogo.ts";
 import { buildCompras, readCompras } from "./compras.ts";
 import { dataDirs } from "./data-dirs.ts";
@@ -57,6 +59,7 @@ write("no-publicado.json", notPublished);
 
 const comprasDir = dirs.processed("compras-bac");
 const deflator = readDeflator(dirs.processed("indec-ipc"));
+const converter = readConverter(dirs.processed("bcra-cotizaciones"));
 let summary = "sin datos de compras-bac";
 if (existsSync(comprasDir)) {
   const { processes, awards } = await readCompras(comprasDir);
@@ -69,7 +72,7 @@ if (existsSync(comprasDir)) {
     descargado: award?.fetched_at ?? null,
     datos: dataUrl("compras-bac"),
   };
-  const pages = buildCompras(processes, awards, origin, deflator);
+  const pages = buildCompras(processes, awards, origin, deflator, converter);
   write("compras/resumen.json", pages.summary);
   write("compras/organismos.json", pages.agencies);
   for (const a of pages.agencyDetails) write(`compras/organismos/${a.id}.json`, a);
@@ -78,6 +81,7 @@ if (existsSync(comprasDir)) {
   write("senales.json", buildSenales(processes, awards, origin));
   summary = `${processes.length} procesos, ${awards.length} adjudicaciones, ${pages.agencies.length} organismos, ${pages.suppliers.length} empresas`;
   summary += deflator ? `, pesos de ${deflator.referencia} desde ${deflator.desde}` : ", sin IPC (solo pesos nominales)";
+  summary += converter ? `, ${converter.monedas.join(" y ")} convertidos` : ", sin cotizaciones (otras monedas aparte)";
 } else {
   console.warn(`No está ${comprasDir}: las páginas de compras quedan vacías (ver CT_DATA_DIR en este archivo).`);
 }

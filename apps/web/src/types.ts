@@ -15,6 +15,12 @@ export interface ConstantPesos {
   desde: number;
 }
 
+/** How amounts in dollars and euros are converted to pesos for the yearly chart. */
+export interface Exchange {
+  fuente: string;
+  monedas: string[];
+}
+
 /** An amount in nominal and in constant pesos. */
 export interface Amount {
   montoArs: number;
@@ -39,6 +45,9 @@ export interface YearRow extends Amount {
   anio: number;
   procesos: number;
   adjudicaciones: number;
+  /** Awards in other currencies converted to pesos with the rate of their month (not added to `montoArs`). Null
+   * without exchange rates. */
+  otras: Amount | null;
 }
 
 export interface ProcedureRow extends Amount {
@@ -106,6 +115,7 @@ export interface AwardItem {
 export interface ComprasSummary {
   origen: Origin;
   constantes: ConstantPesos | null;
+  cambio: Exchange | null;
   totales: Amount & {
     procesos: number;
     adjudicaciones: number;
@@ -133,6 +143,7 @@ export type AgencySupplier = Pick<SupplierSummary, "cuit" | "nombre" | "montoArs
 export interface AgencyDetail extends AgencySummary {
   origen: Origin;
   constantes: ConstantPesos | null;
+  cambio: Exchange | null;
   ultimoAnioCompleto: number | null;
   otrasMonedas: OtherCurrencies;
   porAnio: YearRow[];
@@ -148,6 +159,7 @@ export interface AgencyDetail extends AgencySummary {
 export interface SupplierDetail extends SupplierSummary {
   origen: Origin;
   constantes: ConstantPesos | null;
+  cambio: Exchange | null;
   ultimoAnioCompleto: number | null;
   otrasMonedas: OtherCurrencies;
   porAnio: YearRow[];

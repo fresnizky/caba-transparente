@@ -56,7 +56,9 @@ export function ComoLeerPage() {
           desde 2017, y las anteriores quedan afuera.
         </p>
         <p>
-          Las compras en dólares o euros no se suman a los pesos ni se convierten: se informan aparte. Cuando Buenos Aires Compras no dice
+          Las compras en dólares o euros aparecen en los gráficos por año, encima de las barras en pesos y en otro color: se convierten con
+          la cotización promedio del BCRA del mes de cada adjudicación (y, en pesos constantes, después se ajustan por inflación). En los
+          demás montos, como los totales y los rankings, no se suman: se informan aparte, en su moneda. Cuando Buenos Aires Compras no dice
           la moneda de una adjudicación, se toma la del proceso.
         </p>
       </Item>

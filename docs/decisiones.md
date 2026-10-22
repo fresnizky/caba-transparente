@@ -160,6 +160,16 @@ Se trabaja como un equipo desde el primer día, aunque hoy haya una sola persona
 
 **Qué la haría cambiar:** necesitar comparar años anteriores a 2017. En ese caso se evalúa el IPCBA de la Ciudad, que empieza en 2012 pero viene en dos bases (julio 2011 y 2021) que habría que empalmar.
 
+## D-16. Dólares y euros en los gráficos, convertidos con la cotización del BCRA
+
+**Fecha:** 22/10/2026
+
+- En los gráficos por año, las adjudicaciones en dólares y euros se suman encima de las barras en pesos, en otro color. Se convierten con el promedio mensual de la cotización del BCRA (API de Estadísticas Cambiarias, `bcra-cotizaciones`) del mes de cada adjudicación. En pesos constantes, primero se convierten y después se ajustan con el IPC (D-15).
+- En totales, rankings y señales no se convierten: siguen solo en pesos, y las otras monedas se informan aparte, en su moneda.
+- Se usa la misma fuente para las dos monedas. Para el dólar no es exactamente la Comunicación A 3500 (difiere en centavos).
+
+**Por qué:** desde 2023 pesan: en 2025 hubo unos US$ 104 millones, cerca del 20 % de lo adjudicado en pesos. Dejarlas fuera del gráfico lo hacía ver más chico de lo que fue.
+
 ## Abiertas
 
 - **Datos personales.** Ver D-04.

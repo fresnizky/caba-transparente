@@ -110,8 +110,8 @@ export function ProveedorPage() {
 
       {p.porAnio.length > 1 && (
         <Section id="por-anio" title="Contratos adjudicados por año">
-          <YearChart rows={p.porAnio} lastComplete={p.ultimoAnioCompleto} pesos={pesos} />
-          <OtherCurrenciesNote amounts={p.otrasMonedas} />
+          <YearChart rows={p.porAnio} lastComplete={p.ultimoAnioCompleto} pesos={pesos} cambio={p.cambio} />
+          <OtherCurrenciesNote amounts={p.otrasMonedas} converted={p.cambio !== null} />
         </Section>
       )}
 

@@ -40,8 +40,8 @@ export function ComprasPage() {
       </Stats>
 
       <Section id="por-anio" title="Contratos adjudicados por año">
-        <YearChart rows={r.porAnio} lastComplete={r.ultimoAnioCompleto} pesos={p} />
-        <OtherCurrenciesNote amounts={t.otrasMonedas} />
+        <YearChart rows={r.porAnio} lastComplete={r.ultimoAnioCompleto} pesos={p} cambio={r.cambio} />
+        <OtherCurrenciesNote amounts={t.otrasMonedas} converted={r.cambio !== null} />
       </Section>
 
       <Section
