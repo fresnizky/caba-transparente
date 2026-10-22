@@ -2,7 +2,7 @@
 
 Guía única para cualquier agente (Claude Code, Codex, Cursor…). `CLAUDE.md` solo la importa.
 
-Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Buenos Aires, archivarlos tal cual, normalizarlos y publicarlos con la fuente de cada número. Antes de empezar, leer `docs/decisiones.md` y `docs/relevamiento-fuentes.md`.
+Proyecto cívico: recopilar los datos públicos del Gobierno de la Ciudad de Buenos Aires, archivarlos tal cual, normalizarlos y publicarlos con la fuente de cada número. Antes de empezar, leer `docs/decisiones.md`, `docs/relevamiento-fuentes.md` y `docs/hoja-de-ruta.md`.
 
 ## Idioma
 
