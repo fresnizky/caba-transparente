@@ -47,7 +47,12 @@ export interface YearRow extends Amount {
   adjudicaciones: number;
   /** Awards in other currencies converted to pesos with the rate of their month (not added to `montoArs`). Null
    * without exchange rates. */
-  otras: Amount | null;
+  otras: Converted | null;
+}
+
+/** Converted awards, in total and per currency (USD, EUR), with what they were in their own currency. */
+export interface Converted extends Amount {
+  porMoneda: Record<string, Amount & { monto: number }>;
 }
 
 export interface ProcedureRow extends Amount {

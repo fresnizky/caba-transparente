@@ -204,6 +204,10 @@ describe("other currencies in the yearly rows", () => {
     const { summary } = buildCompras(processes, awards, origin, deflator, converter);
     const y = summary.porAnio[0]!;
     expect(y).toMatchObject({ anio: 2017, montoArs: 100, otras: { montoArs: 330, montoReal: 660 } });
+    expect(y.otras?.porMoneda).toEqual({
+      USD: { monto: 10, montoArs: 160, montoReal: 320 },
+      EUR: { monto: 10, montoArs: 170, montoReal: 340 },
+    });
     expect(summary.cambio).toEqual({ fuente: "BCRA, Estadísticas Cambiarias", monedas: ["EUR", "USD"] });
     expect(summary.totales.otrasMonedas).toEqual({ USD: 20, EUR: 10 });
   });
