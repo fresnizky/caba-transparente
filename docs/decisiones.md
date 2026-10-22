@@ -43,14 +43,17 @@ Dónde viven los originales: ver D-05.
 **Casos conocidos hasta ahora** (`docs/relevamiento-fuentes.md`):
 
 - `autoridades-superiores`: dataset con CUIL, edad y mail de cada funcionario.
-- `boletin-oficial`: PDFs de publicación obligatoria. Falta verificar cuántos actos traen DNI o CUIL.
+- `boletin-oficial`: PDFs de publicación obligatoria. En una muestra de tres ediciones (20/10/2026) aparecen 590 CUIL y 207 DNI de personas: los traen la mayoría de las normas de personal (designaciones, renuncias, licencias), algunas compras a personas humanas, nóminas y los edictos, que además nombran a particulares y a sus familiares en el propio sumario. Decidido el 20/10/2026:
+  - **Copia fiel.** Es una publicación oficial obligatoria: los PDF se guardan tal cual se publicaron, en R2 y en archive.org. Para simplificar hay una sola lista (`RAW_EXCLUDED`): lo que no va a R2 tampoco va a archive.org, y el Boletín va a los dos.
+  - **Procesados sin datos del texto.** Se publica el índice de la API (sección, tipo, organismo, nombre, sumario, enlaces). El sumario de los edictos no se publica, ni ningún sumario con un DNI o CUIL.
+  - **Pedidos de retiro.** Antes de la primera versión pública se publica un mail para pedir que se retire un documento.
 - `compras-bac`: nombre y CUIT de proveedores que son personas humanas (20, 23, 24, 27), y nombres de pacientes (a veces con historia clínica o DNI) en los títulos de compras de hospitales. Para los títulos se decidió el 19/10/2026: se ocultan los que tienen marcas de un paciente (PTE, PCTE, PACIENTE, PAC, HC, DNI, CUIL, ayuda médica y sus abreviaturas, inicial seguida de un DNI) y la columna `titulo_oculto` lo indica. Son unos 11.000 procesos (13 %). La detección por marcas deja pasar algunos títulos sin marca; cuando aparece una marca nueva se agrega a `PERSONAL_DATA` (`compras-bac.ts`) y se reprocesa desde `data/raw/`. Por eso los procesados de esta fuente se publican en R2 y no en git (20/10/2026): en R2 la versión corregida reemplaza a la anterior, mientras que git conserva en su historial cualquier nombre que se haya escapado.
 
 **Opciones a evaluar:** distinguir publicaciones oficiales obligatorias (copia fiel) de datasets con columnas que exceden la finalidad (versión redactada). En ambos casos se guarda en el manifest el sha256 del original.
 
 **Mientras esté abierta:**
 
-- Los originales de fuentes con datos personales se descargan solo a `data/raw/` local; no se suben a R2 ni a archive.org.
+- Los originales de fuentes con datos personales se descargan solo a `data/raw/` local; no se suben a R2 ni a archive.org. La excepción son las publicaciones oficiales obligatorias, como el Boletín Oficial, que se guardan como copia fiel.
 - Los datos procesados y la web no muestran DNI, CUIL, edad, domicilio, mail ni datos de familiares.
 - A los proveedores que son personas humanas no se los perfila.
 
