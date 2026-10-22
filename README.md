@@ -4,7 +4,7 @@
 
 En qué gasta la Ciudad, a quién le compra y quién decide. Datos oficiales del Gobierno de la Ciudad Autónoma de Buenos Aires, guardados tal cual se publicaron, normalizados y con la fuente de cada número.
 
-> Estado: esqueleto inicial. Todavía no hay recolectores ni web.
+> Estado: en preparación. Hay datos de Buenos Aires Compras y una primera versión de la web para desarrollo local.
 
 ## Cómo funciona
 
@@ -25,6 +25,7 @@ flowchart TD
 
 | Carpeta | Qué es |
 |---|---|
+| `apps/web` | `@ct/web`: el sitio (Vite, React y TanStack Router). Ver [docs/procesos/web.md](docs/procesos/web.md) |
 | `packages/core` | `@ct/core`: descarga, archivado, CSV y archive.org |
 | `packages/scrapers` | `@ct/scrapers`: un recolector por fuente y el copiado a archive.org |
 | `sources.yaml` | Catálogo de fuentes |
@@ -37,6 +38,7 @@ Hace falta [Bun](https://bun.sh).
 
 ```bash
 bun install
+bun run dev                      # la web en http://localhost:5180 (arma antes sus datos)
 bun run scrape <fuente> [args]   # correr un recolector
 bun run archivar [fuentes...]    # copiar los originales a archive.org (necesita IA_ACCESS_KEY e IA_SECRET_KEY)
 bun run typecheck

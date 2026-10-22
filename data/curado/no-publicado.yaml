@@ -1,0 +1,48 @@
+# Lo que debería ser público y no está (página /no-publicado). Contenido escrito a mano: cada entrada dice qué falta,
+# qué encontramos y cuándo, y quién debería publicarlo. Solo hechos verificados (docs/relevamiento-fuentes.md).
+
+- id: ofertas-por-compra
+  titulo: Cuántas ofertas recibió cada compra
+  descripcion: >-
+    Los datos abiertos de Buenos Aires Compras dicen quién ganó cada compra, pero no cuántas empresas se presentaron ni
+    qué ofrecieron. Sin ese dato no se puede saber cuántas compras tuvieron un solo oferente, que es la señal más
+    directa de poca competencia.
+  evidencia: >-
+    El 19/10/2026 revisamos los nueve archivos del dataset: ninguno trae ofertas ni oferentes (en el estándar OCDS,
+    los campos bids o tender/numberOfTenderers, o participantes con el rol tenderer).
+  organismo: Ministerio de Hacienda y Finanzas
+  url: https://data.buenosaires.gob.ar/dataset/buenos-aires-compras
+
+- id: compras-antes-de-2014
+  titulo: Las compras anteriores a 2014
+  descripcion: >-
+    El portal dice que Buenos Aires Compras tiene datos «desde el 2011», pero los archivos empiezan en 2014.
+  evidencia: >-
+    En el archivo completo (bac.csv), bajado el 20/10/2026, los 82.115 procesos van de 2014 a 2026.
+  organismo: Ministerio de Hacienda y Finanzas
+  url: https://data.buenosaires.gob.ar/dataset/buenos-aires-compras
+
+- id: sueldos-funcionarios
+  titulo: Los sueldos actuales de jefe de Gobierno, ministros y secretarios
+  descripcion: >-
+    El catálogo dice que el dataset se actualiza cada tres meses, pero el último período publicado es de 2024.
+  evidencia: Relevado el 18/10/2026.
+  organismo: Ministerio de Hacienda y Finanzas
+  url: https://data.buenosaires.gob.ar/dataset/sueldo-funcionarios
+
+- id: autoridades-superiores
+  titulo: Quién ocupa hoy cada cargo del Gobierno
+  descripcion: >-
+    La lista de autoridades superiores y funcionarios debería actualizarse todos los meses según el catálogo, pero el
+    último archivo es de 2024.
+  evidencia: Relevado el 18/10/2026. El último archivo es del 05/02/2025 y llega hasta 2024.
+  organismo: Ministerio de Hacienda y Finanzas
+  url: https://data.buenosaires.gob.ar/dataset/autoridades-superiores-funcionarios
+
+- id: declaraciones-juradas
+  titulo: Las declaraciones juradas de los últimos años
+  descripcion: >-
+    El dataset de declaraciones juradas de funcionarios figura como mensual, pero el último período publicado es 2022.
+  evidencia: Relevado el 18/10/2026.
+  organismo: Secretaría Legal y Técnica
+  url: https://data.buenosaires.gob.ar/dataset/declaraciones-juradas
