@@ -3,9 +3,13 @@
   "private": true,
   "packageManager": "bun@1.3.5",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
+    "dev": "bun run --filter @ct/web dev",
+    "web:datos": "bun run --filter @ct/web data",
+    "web:build": "bun run --filter @ct/web build",
     "scrape": "bun packages/scrapers/src/cli.ts",
     "archivar": "bun packages/scrapers/src/archive-org.ts",
     "subir-r2": "bun --env-file=.env.r2 packages/scrapers/src/r2.ts",

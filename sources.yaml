@@ -61,3 +61,19 @@ fuentes:
     formato: CSV
     frecuencia: semestral
     estado: relevado
+
+  - id: indec-ipc
+    nombre: Índice de precios al consumidor (IPC)
+    organismo: INDEC (Nación)
+    url: https://www.indec.gob.ar/indec/web/Nivel4-Tema-3-5-31
+    formato: CSV
+    frecuencia: mensual
+    estado: activo
+
+  - id: bcra-cotizaciones
+    nombre: Cotizaciones del dólar y el euro
+    organismo: Banco Central de la República Argentina
+    url: https://www.bcra.gob.ar/apis-banco-central/
+    formato: API REST (JSON)
+    frecuencia: diaria
+    estado: activo

@@ -134,8 +134,43 @@ Se trabaja como un equipo desde el primer día, aunque hoy haya una sola persona
 
 **Por qué una sola rama principal:** Mendoza usa `dev` y `main` para controlar cuándo se publica. Acá alcanza con `main` y las vistas previas de Cloudflare en cada PR; si hace falta una rama de publicación, se agrega después.
 
+## D-14. Web: Vite, React y TanStack Router, con datos pre-armados
+
+**Fecha:** 21/10/2026
+
+- `apps/web` es una aplicación React 19 con Vite, TanStack Router y Tailwind 4, el mismo stack que Mendoza Transparente, para poder seguir trayendo ideas y piezas de ahí.
+- Antes de servir o construir, `apps/web/scripts/build-data.ts` lee `data/processed/`, los manifests y `data/curado/`, y escribe JSON en `apps/web/public/data/`: un archivo por página (resumen, un archivo por organismo y por empresa, señales, catálogo). La web no hace cuentas: solo muestra.
+- Los JSON se generan en cada build y no van a git, igual que los procesados (D-04, D-05). En desarrollo se leen de `data/` o de la carpeta que diga `CT_DATA_DIR`.
+- Por ahora es una SPA: Cloudflare Pages sirve `index.html` para cualquier ruta (`public/_redirects`). Las páginas pre-generadas para buscadores (D-06) se agregan antes de la versión pública.
+- Turborepo sigue sin hacer falta (D-02): hay una sola app y `bun run --filter` alcanza.
+
+**Por qué:** las cuentas (sumas, señales) se hacen una vez sobre los CSV completos, que no entran en el navegador, y quedan probadas con `bun test`. Cada página baja solo lo suyo: la más pesada, la lista de empresas, pesa unos 500 KB sin comprimir.
+
+**Qué la haría cambiar:** que el build supere el cupo de archivos de Cloudflare (hoy son unos 3.800 de 20.000, casi todos fichas de empresas) o que haga falta buscar dentro de los procesos, que no entran en un JSON por página.
+
+## D-15. Pesos constantes con el IPC de INDEC, sin empalmes
+
+**Fecha:** 22/10/2026
+
+- Los montos de compras se pueden ver en pesos de cada año (como los publica la Ciudad) o en pesos constantes. Por defecto, pesos de cada año.
+- Para los pesos constantes se usa solo el IPC de INDEC, nivel general, región GBA (`indec-ipc`, de `serie_ipc_divisiones.csv`). Cada adjudicación se lleva al último mes publicado según el mes de su fecha.
+- La serie empieza en diciembre de 2016 y **no se empalma** con otras (IPC-GBA anterior, IPCNu, IPCBA de la Ciudad, inflación del BCRA). Lo que el índice no cubre queda afuera de los pesos constantes, y también los años incompletos: hoy cuentan las compras desde 2017.
+
+**Por qué:** mezclar series de metodologías distintas, algunas de años en que el INDEC estaba intervenido, mete supuestos en cada número. Es preferible mostrar menos años, con un solo índice oficial y fácil de verificar. Se eligió la región GBA porque la Ciudad forma parte de ella.
+
+**Qué la haría cambiar:** necesitar comparar años anteriores a 2017. En ese caso se evalúa el IPCBA de la Ciudad, que empieza en 2012 pero viene en dos bases (julio 2011 y 2021) que habría que empalmar.
+
+## D-16. Dólares y euros en los gráficos, convertidos con la cotización del BCRA
+
+**Fecha:** 22/10/2026
+
+- En los gráficos por año, las adjudicaciones en dólares y euros se suman encima de las barras en pesos, en otro color. Se convierten con el promedio mensual de la cotización del BCRA (API de Estadísticas Cambiarias, `bcra-cotizaciones`) del mes de cada adjudicación. En pesos constantes, primero se convierten y después se ajustan con el IPC (D-15).
+- En totales, rankings y señales no se convierten: siguen solo en pesos, y las otras monedas se informan aparte, en su moneda.
+- Se usa la misma fuente para las dos monedas. Para el dólar no es exactamente la Comunicación A 3500 (difiere en centavos).
+
+**Por qué:** desde 2023 pesan: en 2025 hubo unos US$ 104 millones, cerca del 20 % de lo adjudicado en pesos. Dejarlas fuera del gráfico lo hacía ver más chico de lo que fue.
+
 ## Abiertas
 
 - **Datos personales.** Ver D-04.
-- **Stack de la web.** Se decide después de ver los primeros datos.
 - **Acceso desde la nube.** Probado el 18/10/2026: todos los sitios relevados responden desde GitHub Actions salvo Estadística de la Ciudad, que también falla desde Argentina (sitio inestable). Por ahora no hace falta proxy. Detalle en `docs/relevamiento-fuentes.md`.
