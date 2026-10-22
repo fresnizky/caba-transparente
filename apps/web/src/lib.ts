@@ -33,21 +33,24 @@ export function percent(share: number): string {
   return `${ar(share * 100, share > 0 && share < 0.01 ? 1 : 0)} %`;
 }
 
-/** Pesos in words, the way the press writes them: "$ 2,2 billones", "$ 436 mil millones", "$ 12,3 millones". */
-export function pesos(n: number): string {
+/** Amounts in words, the way the press writes them: "$ 2,2 billones", "$ 436 mil millones", "US$ 12,3 millones". */
+export function inWords(n: number, symbol = "$"): string {
   const abs = Math.abs(n);
   const short = (v: number) => ar(v, v < 10 ? 1 : 0);
-  if (abs >= 1e12) return `$ ${short(n / 1e12)} billones`;
-  if (abs >= 1e9) return `$ ${short(n / 1e9)} mil millones`;
-  if (abs >= 1e6) return `$ ${short(n / 1e6)} millones`;
-  return `$ ${ar(n)}`;
+  if (abs >= 1e12) return `${symbol} ${short(n / 1e12)} billones`;
+  if (abs >= 1e9) return `${symbol} ${short(n / 1e9)} mil millones`;
+  if (abs >= 1e6) return `${symbol} ${short(n / 1e6)} millones`;
+  return `${symbol} ${ar(n)}`;
 }
+
+export const pesos = (n: number) => inWords(n);
+
+export const currencySymbol = (currency: string) => (currency === "USD" ? "US$" : currency === "EUR" ? "€" : currency);
 
 export function money(n: number | null, currency: string | null): string {
   if (n === null) return "Sin monto";
   if (!currency || currency === "ARS") return pesos(n);
-  const symbol = currency === "USD" ? "US$" : currency === "EUR" ? "€" : currency;
-  return `${symbol} ${ar(n)}`;
+  return `${currencySymbol(currency)} ${ar(n)}`;
 }
 
 /** 2026-10-19 or 2026-10-19T03:17:34Z → 19/10/2026. */

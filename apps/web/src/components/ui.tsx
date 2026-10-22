@@ -3,7 +3,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { count, date, int, pesos } from "../lib.ts";
+import { count, currencySymbol, date, int, inWords, pesos } from "../lib.ts";
 import type { Pesos } from "../pesos.tsx";
 import type { Exchange, Origin, OtherCurrencies, YearRow } from "../types.ts";
 
@@ -102,8 +102,6 @@ export function YearChart({
   const partial = (r: YearRow) => lastComplete !== null && r.anio > lastComplete;
   const hasOther = shown.some((r) => other(r) > 0);
   if (!shown.length) return <Empty>Sin compras desde {p.constantes?.desde}, el primer año que cubre el índice.</Empty>;
-  const label = (r: YearRow) =>
-    other(r) > 0 ? `${r.anio}: ${p.format(r)} en pesos y ${pesos(other(r))} en otras monedas convertidas` : `${r.anio}: ${p.format(r)}`;
   return (
     <figure className="flex flex-col gap-2">
       {hasOther && (
@@ -121,8 +119,15 @@ export function YearChart({
         role="img"
         aria-label={`Contratos adjudicados por año, por su monto total. ${p.unit}.`}
       >
-        {shown.map((r) => (
-          <div key={r.anio} className="group flex h-full flex-1 flex-col justify-end" title={label(r)}>
+        {shown.map((r, i) => (
+          <div key={r.anio} className="group relative flex h-full flex-1 flex-col justify-end">
+            <YearTooltip
+              row={r}
+              pesos={p}
+              partial={partial(r)}
+              bottom={(total(r) / max) * 100}
+              align={i < shown.length / 3 ? "left" : i >= (shown.length * 2) / 3 ? "right" : "center"}
+            />
             {other(r) > 0 && (
               <div
                 className={`rounded-t ${partial(r) ? "bg-bar-other-soft" : "bg-bar-other"} group-hover:opacity-80`}
@@ -158,7 +163,13 @@ export function YearChart({
             <tr key={r.anio}>
               <th>{r.anio}</th>
               <td>{p.format(r)} en pesos</td>
-              <td>{other(r) > 0 ? `${pesos(other(r))} en otras monedas, convertidas` : "Sin otras monedas"}</td>
+              <td>
+                {other(r) > 0
+                  ? `${pesos(other(r))} en otras monedas, convertidas: ${Object.entries(r.otras?.porMoneda ?? {})
+                      .map(([code, c]) => `${inWords(c.monto, currencySymbol(code))} (${pesos(p.value(c) ?? 0)})`)
+                      .join(", ")}`
+                  : "Sin otras monedas"}
+              </td>
               <td>{count(r.adjudicaciones, "adjudicación", "adjudicaciones")}</td>
             </tr>
           ))}
@@ -168,11 +179,67 @@ export function YearChart({
   );
 }
 
+const ALIGN = { left: "left-0", center: "left-1/2 -translate-x-1/2", right: "right-0" } as const;
+
+/** Shown on hover over a year's bar: what it adds up to: pesos and, apart, each other currency in its own amount and converted to pesos. */
+function YearTooltip({
+  row: r,
+  pesos: p,
+  partial,
+  bottom,
+  align,
+}: {
+  row: YearRow;
+  pesos: Pesos;
+  partial: boolean;
+  bottom: number;
+  align: keyof typeof ALIGN;
+}) {
+  const currencies = Object.entries(r.otras?.porMoneda ?? {}).filter(([, c]) => (p.value(c) ?? 0) > 0);
+  const other = r.otras ? (p.value(r.otras) ?? 0) : 0;
+  return (
+    <div
+      className={`pointer-events-none absolute z-10 hidden w-max max-w-72 rounded-lg border border-line bg-white px-3 py-2 text-sm shadow-lg group-hover:block ${ALIGN[align]}`}
+      style={{ bottom: `calc(${bottom}% + 0.5rem)` }}
+      aria-hidden
+    >
+      <p className="font-semibold">
+        {r.anio}
+        {partial && <span className="font-normal text-subtle"> · en curso</span>}
+      </p>
+      <dl className="mt-1 grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5 tabular">
+        <dt className="flex items-center gap-1.5 text-muted">
+          <span className="size-2.5 rounded-sm bg-bar" /> En pesos
+        </dt>
+        <dd className="text-right">{p.format(r)}</dd>
+        {currencies.map(([code, c]) => (
+          <div key={code} className="contents">
+            <dt className="flex items-center gap-1.5 text-muted">
+              <span className="size-2.5 rounded-sm bg-bar-other" /> {inWords(c.monto, currencySymbol(code))}
+            </dt>
+            <dd className="text-right">{pesos(p.value(c) ?? 0)}</dd>
+          </div>
+        ))}
+        {other > 0 && (
+          <>
+            <dt className="border-t border-line pt-0.5 font-medium">Total</dt>
+            <dd className="border-t border-line pt-0.5 text-right font-medium">{pesos((p.value(r) ?? 0) + other)}</dd>
+          </>
+        )}
+      </dl>
+      <p className="mt-1 text-xs text-subtle">
+        {count(r.adjudicaciones, "adjudicación", "adjudicaciones")}. {p.real ? p.unit.replace(/, desde \d+$/, "") : "En pesos de ese año"}
+        {other > 0 && ", con las otras monedas convertidas al promedio del mes"}.
+      </p>
+    </div>
+  );
+}
+
 /** Totals in other currencies, in their own currency. When the chart converts them, it says so. */
 export function OtherCurrenciesNote({ amounts, converted }: { amounts: OtherCurrencies; converted?: boolean }) {
   const parts = Object.entries(amounts)
     .filter(([, v]) => v > 0)
-    .map(([c, v]) => `${c === "USD" ? "US$" : c === "EUR" ? "€" : c} ${int(v)}`);
+    .map(([c, v]) => `${currencySymbol(c)} ${int(v)}`);
   if (!parts.length) return null;
   return (
     <p className="text-sm text-subtle">

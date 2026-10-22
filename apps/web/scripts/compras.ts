@@ -184,7 +184,7 @@ function byYear(money: Money, processes: Process[], awards: Award[]): YearRow[] 
         adjudicaciones: 0,
         montoArs: 0,
         montoReal: real,
-        otras: money.converts ? { montoArs: 0, montoReal: real } : null,
+        otras: money.converts ? { montoArs: 0, montoReal: real, porMoneda: {} } : null,
       };
       rows.set(anio, r);
     }
@@ -202,9 +202,13 @@ function byYear(money: Money, processes: Process[], awards: Award[]): YearRow[] 
     r.montoArs += pesos(a);
     if (r.montoReal !== null) r.montoReal += money.real(a) ?? 0;
     const other = money.converted(a);
-    if (other && r.otras) {
-      r.otras.montoArs += other.montoArs;
-      if (r.otras.montoReal !== null) r.otras.montoReal += other.montoReal ?? 0;
+    if (other && r.otras && a.moneda && a.monto !== null) {
+      const c = (r.otras.porMoneda[a.moneda] ??= { monto: 0, montoArs: 0, montoReal: r.otras.montoReal === null ? null : 0 });
+      for (const t of [r.otras, c]) {
+        t.montoArs += other.montoArs;
+        if (t.montoReal !== null) t.montoReal += other.montoReal ?? 0;
+      }
+      c.monto += a.monto;
     }
   }
   return [...rows.values()].sort((a, b) => a.anio - b.anio);
