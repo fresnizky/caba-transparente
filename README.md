@@ -39,8 +39,12 @@ Hace falta [Bun](https://bun.sh).
 ```bash
 bun install
 bun run dev                      # la web en http://localhost:5180 (arma antes sus datos)
+bun run web:datos                # armar los datos de la web en apps/web/public/data
+bun run web:build                # armar los datos y compilar la web
 bun run scrape <fuente> [args]   # correr un recolector
 bun run archivar [fuentes...]    # copiar los originales a archive.org (necesita IA_ACCESS_KEY e IA_SECRET_KEY)
+bun run subir-r2 [fuentes...]    # copiar originales y procesados a Cloudflare R2 (necesita las claves en .env.r2)
+bun run probar-acceso            # ver si los sitios de la Ciudad responden desde esta máquina
 bun run typecheck
 bun test
 bun run lint
