@@ -4,7 +4,7 @@
 
 En qué gasta la Ciudad, a quién le compra y quién decide. Datos oficiales del Gobierno de la Ciudad Autónoma de Buenos Aires, guardados tal cual se publicaron, normalizados y con la fuente de cada número.
 
-> Estado: en preparación. Hay datos de Buenos Aires Compras y una primera versión de la web para desarrollo local.
+> Estado: en preparación. Ya funcionan los recolectores `compras-bac`, `indec-ipc` y `bcra-cotizaciones`. La web tiene una primera versión para desarrollo local, todavía sin publicar.
 
 ## Cómo funciona
 
