@@ -25,8 +25,8 @@ const date = (iso: string | null) => (iso ? iso.split("-").reverse().join("/") :
 export function buildSenales(processes: Process[], awards: Award[], origin: Origin): SignalsTopic {
   const awarded = awardedByProcess(processes, awards);
   const ars = processes.filter((p) => p.moneda === "ARS");
-  const years = processes.map((p) => p.fecha?.slice(0, 4)).filter((y): y is string => !!y);
-  const period = years.length ? `${years.reduce((a, b) => (a < b ? a : b))} a ${years.reduce((a, b) => (a > b ? a : b))}` : "";
+  const years = processes.map((p) => Number(p.fecha?.slice(0, 4))).filter((y) => y > 0);
+  const period = years.length ? `${years.reduce((a, b) => Math.min(a, b))} a ${years.reduce((a, b) => Math.max(a, b))}` : "";
   const source = `Buenos Aires Compras (datos abiertos, formato OCDS), ${period}. Montos nominales: no están ajustados por inflación.`;
 
   const processCase = (p: Process, extra?: string): SignalCase => ({
