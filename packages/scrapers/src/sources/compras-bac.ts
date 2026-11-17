@@ -18,7 +18,6 @@ import {
   detach,
   get,
   latestEntry,
-  type ManifestEntry,
   normalizeCuit,
   parseCsvStream,
   personKind,
@@ -27,8 +26,7 @@ import {
   readRawStream,
   sleep,
   streamAndArchive,
-  writeProcessed,
-  writeProcessedMeta,
+  writeProcessedByYear,
 } from "@ct/core";
 
 export const SOURCE = "compras-bac";
@@ -309,38 +307,6 @@ export function addAwardRow(awards: Map<string, AwardSummary>, a: Picked<typeof 
 const byDateAndId = (key: string) => (a: Row, b: Row) =>
   String(a.fecha ?? "").localeCompare(String(b.fecha ?? "")) || String(a[key]).localeCompare(String(b[key]));
 
-/** One CSV per year (by `fecha`), so no file gets near GitHub's 100 MB limit. */
-async function writeByYear(
-  name: string,
-  rows: Row[],
-  columns: Record<string, string>,
-  meta: { titulo: string; descripcion: string; originales: ManifestEntry[]; notas: string[] },
-): Promise<Map<string, number>> {
-  const byYear = new Map<string, Row[]>();
-  for (const row of rows) {
-    const year = String(row.fecha ?? "").slice(0, 4) || "sin-fecha";
-    const list = byYear.get(year);
-    if (list) list.push(row);
-    else byYear.set(year, [row]);
-  }
-  const counts = new Map<string, number>();
-  for (const [year, yearRows] of [...byYear].sort()) {
-    const filename = `${name}/${year}.csv`;
-    await writeProcessed(SOURCE, filename, yearRows, Object.keys(columns));
-    await writeProcessedMeta(SOURCE, filename, {
-      titulo: `${meta.titulo} (${year})`,
-      descripcion: meta.descripcion,
-      fuente: DATASET_URL,
-      licencia: LICENSE,
-      originales: meta.originales.map(({ path, url, sha256 }) => ({ path, url, sha256 })),
-      columnas: columns,
-      notas: meta.notas,
-    });
-    counts.set(year, yearRows.length);
-  }
-  return counts;
-}
-
 async function processAll(): Promise<void> {
   const tender = await latestEntry(SOURCE, "tender.csv");
   const award = await latestEntry(SOURCE, "award.csv");
@@ -380,16 +346,22 @@ async function processAll(): Promise<void> {
     "Montos nominales en la moneda de cada fila: no se convierten ni se ajustan por inflación.",
     "Los títulos que nombran a un paciente (compras de hospitales para una persona) se ocultan; la detección es por marcas y puede dejar pasar alguno (D-04 en docs/decisiones.md).",
   ];
-  const processCounts = await writeByYear("procesos", processRows, PROCESS_COLUMNS, {
+  const processCounts = await writeProcessedByYear(SOURCE, "procesos", processRows, {
     titulo: "Buenos Aires Compras: procesos de compra",
     descripcion: "Un proceso de compra por fila (licitaciones, contrataciones directas y menores), de tender.csv.",
+    fuente: DATASET_URL,
+    licencia: LICENSE,
     originales: [tender],
+    columnas: PROCESS_COLUMNS,
     notas: notes,
   });
-  const awardCounts = await writeByYear("adjudicaciones", awardRows, AWARD_OUTPUT_COLUMNS, {
+  const awardCounts = await writeProcessedByYear(SOURCE, "adjudicaciones", awardRows, {
     titulo: "Buenos Aires Compras: adjudicaciones",
     descripcion: "Un lote adjudicado por fila, con su proveedor, de award.csv y tender.csv.",
+    fuente: DATASET_URL,
+    licencia: LICENSE,
     originales: [award, tender],
+    columnas: AWARD_OUTPUT_COLUMNS,
     notas: [...notes, "De los proveedores que son personas humanas no se publican nombre ni CUIT (D-04 en docs/decisiones.md)."],
   });
 

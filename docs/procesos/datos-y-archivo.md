@@ -6,6 +6,7 @@
 - **Solo se agrega, nunca se edita ni se borra.** Si el contenido no cambió, no se guarda de nuevo. Si el mismo día llega una versión distinta, la nueva lleva la hora en el nombre.
 - **Qué cuenta como cambio:** en archivos de datos, cualquier byte distinto. En HTML, solo el texto visible, los links y las imágenes (`contentFingerprint()` en `packages/core/src/fetch.ts`), para no guardar copias por tokens o nonces que cambian en cada visita. Si aparece un caso nuevo, se suma a `VOLATILE_LINK_PARTS`.
 - Los originales no se commitean; los `manifest.jsonl` sí (decisión D-03 en `docs/decisiones.md`).
+- **Cobertura:** las fuentes que se recorren de a muchos documentos (el Boletín, D-07) registran en `data/raw/<fuente>/cobertura.jsonl` qué se bajó completo, qué quedó incompleto y por qué, y qué no existe. Va a git como los manifests. Una corrida cortada sigue desde ahí.
 
 ## Copias en archive.org
 

@@ -150,6 +150,36 @@ export interface ProcessedMeta {
   notas?: string[];
 }
 
+/**
+ * Writes `rows` as one CSV per year of their `fecha` (`<name>/<year>.csv`, or `<name>/sin-fecha.csv`), each with its
+ * meta.json, so no file gets too big to handle. Columns are the keys of `meta.columnas`. Returns the rows per year.
+ */
+export async function writeProcessedByYear(source: string, name: string, rows: Row[], meta: ProcessedMeta): Promise<Map<string, number>> {
+  const byYear = new Map<string, Row[]>();
+  for (const row of rows) {
+    const year = String(row.fecha ?? "").slice(0, 4) || "sin-fecha";
+    const list = byYear.get(year);
+    if (list) list.push(row);
+    else byYear.set(year, [row]);
+  }
+  const counts = new Map<string, number>();
+  for (const [year, yearRows] of [...byYear].sort()) {
+    const filename = `${name}/${year}.csv`;
+    await writeProcessed(source, filename, yearRows, Object.keys(meta.columnas));
+    await writeProcessedMeta(source, filename, {
+      titulo: `${meta.titulo} (${year})`,
+      descripcion: meta.descripcion,
+      fuente: meta.fuente,
+      licencia: meta.licencia,
+      originales: meta.originales.map(({ path, url, sha256 }) => ({ path, url, sha256 })),
+      columnas: meta.columnas,
+      notas: meta.notas,
+    });
+    counts.set(year, yearRows.length);
+  }
+  return counts;
+}
+
 /** Writes data/processed/<source>/<file>.meta.json. Returns the path. */
 export async function writeProcessedMeta(source: string, filename: string, meta: ProcessedMeta): Promise<string> {
   const path = join(PROCESSED_DIR, source, `${filename}.meta.json`);

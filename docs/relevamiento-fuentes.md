@@ -67,7 +67,14 @@ Lo verificado:
 - Llega al menos al boletín 4550 (30/12/2014). No se probó hasta dónde llega hacia atrás.
 - El `sumario` resume el acto en una línea (qué hace la norma y sobre qué), lo que permite clasificar las normas sin abrir el PDF.
 - Secciones útiles además de normas: Licitaciones (públicas, directas, menores) y «Trimestral de contratos s/Ley de Presupuesto».
-- **Si el parámetro está mal formado** (por ejemplo `20150105`), **devuelve el último boletín sin error.** El recolector tiene que verificar que la fecha que vuelve sea la pedida.
+- **Si el parámetro está mal formado** (por ejemplo `20150105`), **devuelve el último boletín sin error.** Lo mismo pasa con una fecha sin boletín (un domingo). Por eso el recolector recorre los boletines por número, que sí funciona (`obtenerBoletin/7476/false` trae el del 19/10/2026), y verifica que el número que vuelve sea el pedido.
+
+Muestra del 20/10/2026 (ediciones del 20/10, 13/10 y 15/09/2026):
+
+- Cada edición trae entre 400 y 500 normas y avisos. El índice siempre tiene tres niveles: sección, tipo y organismo. Todos los nombres siguen la forma «N° número/sigla/año», salvo algún decreto que trae solo el número.
+- **Archivos por edición:** el PDF completo (`url_boletin`, que es `documentosboletinoficial.buenosaires.gob.ar/publico/AAAAMMDD.pdf`, de 7 a 11 MB y unas 600 páginas), la separata (`AAAAMMDDax.pdf`, unos 1,7 MB) y los **anexos de cada norma, que no están en la separata**: el 20/10 eran 176 PDF de unos 270 KB en promedio (de 60 KB a 1,7 MB). Con anexos, una edición pesa unos 55 MB y lleva unos 180 pedidos.
+- Los PDF del boletín se comprimen bien con gzip (entre 40 y 55 % menos); los anexos, poco.
+- **Datos personales:** en las tres ediciones, 590 CUIL y 207 DNI de personas en el texto de los PDF. Los traen 86 de 133 normas de personal (designaciones, renuncias, licencias, sueldos: el CUIL del agente), 23 de 174 de compras (proveedores personas humanas), nóminas (una de graduados traía 152 CUIL) y los edictos, cuyos sumarios nombran a particulares, a veces con su domicilio o a sus familiares. Decisión en D-04.
 
 ## Funcionarios y gobierno
 
