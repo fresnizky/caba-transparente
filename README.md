@@ -53,3 +53,7 @@ bun run lint
 ## Créditos y licencia
 
 Código: [MIT](LICENSE). Datos procesados: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es). La infraestructura de descarga, archivado y copia en archive.org está adaptada de [Mendoza Transparente](https://github.com/unllamas/mendoza-transparente) (MIT); los archivos adaptados lo indican en su cabecera. Los datos originales pertenecen a sus organismos de origen.
+
+## Automatización
+
+Algunos PRs de este repo los abre un agente de la factory personal del dueño; el merge siempre es humano.
