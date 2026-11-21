@@ -19,6 +19,6 @@ data/raw/**
 !data/raw/**/manifest.jsonl
 !data/raw/**/archive-org.jsonl
 
-# Processed BAC data is published in R2 only (D-04): titles naming a patient are hidden by markers, and if one slips
-# through, R2 replaces the file while git would keep it in its history.
-data/processed/compras-bac/
+# Processed data does not go to git either (D-03): it is published in R2 with `bun run subir-r2`.
+data/processed/**
+!data/processed/.gitkeep
